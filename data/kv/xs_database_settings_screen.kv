@@ -1,0 +1,182 @@
+#:import c kivy.utils.get_color_from_hex
+#:import Scroll kivy.effects.scroll.ScrollEffect
+#:import SmartGridLayout data.classes.smart_grid_layout.SmartGridLayout
+#:import PatternInput data.classes.pattern_input.PatternInput
+
+<DatabaseSettingsScreen>:
+
+    title_label: title_label
+    dirname_label: dirname_label
+    filename_label: filename_label
+
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height - self.width / 4)
+
+    FloatLayout:
+        id: header
+        size_hint: (0.9, 0.1)
+        pos: (root.center_x - self.width / 2, root.height - root.width / 8 - self.height / 2)
+
+        BackButton:
+            id: back_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"x": 0, "center_y": 0.5}
+            on_release: app.switch_screen("cards_screen", "right")
+
+        Label:
+            id: title_label
+            size_hint: (None, None)
+            height: back_btn.height
+            width: header.right - back_btn.right - dp(10)
+            pos_hint: {"center_y": 0.5, "right": 1}
+            text: "database settings"
+            font_size: root.width * 0.9 * 0.09
+            shorten: True
+            shorten_from: "right"
+            text_size: self.size
+            color: c("#222222")
+            halign: "center"
+            valign: "middle"
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (1, None)
+        height: root.height - root.width / 2.5
+        y: (root.width / 2.5 - root.width / 4) / 2
+
+        FloatLayout:
+            size_hint: (0.8, None)
+            height: main_layout.height * 0.25
+            pos_hint: {"top": 0.93, "center_x": 0.5}
+
+            canvas:
+                Color:
+                    rgba: c("#87edc9")
+
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(20, 20), (20, 20), (20, 20), (20, 20)]
+
+                Color:
+                    rgba: c("#04c29c")
+
+                RoundedRectangle:
+                    size: (self.width * 0.9, self.height * 0.5)
+                    pos: (self.x + self.width * 0.1, self.y + self.height * 0.5)
+                    radius: [(0, 0), (20, 20), (0, 0), (20, 20)]
+
+            Label:
+                text: "save backup in chosen directory"
+                pos_hint: {"center_y": 0.75, "center_x": 0.5}
+                size_hint: (0.5, 0.3)
+                font_size: self.height * 0.4
+                text_size: self.size
+                color: c("#444444")
+                halign: "center"
+
+            MoreButton:
+                id: choose_dir_btn
+                size_hint: (None, 0.3)
+                pos_hint: {"center_y": 0.75, "right": 0.95}
+                width: self.height
+                on_release: root.show_directories()
+
+            Label:
+                id: dirname_label
+                text: "no directory chosen yet"
+                size_hint: (0.9, 0.2)
+                pos_hint: {"center_x": 0.5, "y": 0.2}
+                font_size: self.height * 0.6
+                color: c("#666666")
+                text_size: self.size
+                shorten: True
+                shorten_from: "right"
+                halign: "center"
+
+        Button:
+            size_hint: (0.6, 0.07)
+            pos_hint: {"center_x": 0.5, "top": 0.65}
+            background_normal: app.directory + "/data/textures/yes_button_normal.png"
+            background_down: app.directory + "/data/textures/yes_button_down.png"
+            color: c("#444444")
+            text: "save backup"
+            font_size: title_label.font_size * 0.6
+            on_release: root.save_backup()
+            opacity: 0.6
+
+        FloatLayout:
+            size_hint: (0.8, None)
+            height: main_layout.height * 0.25
+            pos_hint: {"top": 0.5, "center_x": 0.5}
+
+            canvas:
+                Color:
+                    rgba: c("#3dd9cc")
+
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(20, 20), (20, 20), (20, 20), (20, 20)]
+
+                Color:
+                    rgba: c("#2da89e")
+
+                RoundedRectangle:
+                    size: (self.width * 0.9, self.height * 0.5)
+                    pos: (self.x + self.width * 0.1, self.y + self.height * 0.5)
+                    radius: [(0, 0), (20, 20), (0, 0), (20, 20)]
+
+            Label:
+                text: "file with backup to upload"
+                pos_hint: {"center_y": 0.75, "center_x": 0.5}
+                size_hint: (0.5, 0.3)
+                font_size: self.height * 0.4
+                text_size: self.size
+                color: c("#444444")
+                halign: "center"
+
+            MoreButton:
+                id: choose_file_btn
+                size_hint: (None, 0.3)
+                pos_hint: {"center_y": 0.75, "right": 0.95}
+                width: self.height
+                on_release: root.show_files()
+
+            Label:
+                id: filename_label
+                text: "no file chosen yet"
+                size_hint: (0.9, 0.4)
+                pos_hint: {"center_x": 0.5, "y": 0.05}
+                font_size: self.height * 0.3
+                color: c("#666666")
+                text_size: self.size
+                halign: "center"
+                valign: "middle"
+
+        Button:
+            size_hint: (0.6, 0.07)
+            pos_hint: {"center_x": 0.5, "top": 0.22}
+            background_normal: app.directory + "/data/textures/yes_button_normal.png"
+            background_down: app.directory + "/data/textures/yes_button_down.png"
+            color: c("#444444")
+            text: "upload backup"
+            font_size: title_label.font_size * 0.6
+            on_release: root.upload_backup()
+            opacity: 0.6

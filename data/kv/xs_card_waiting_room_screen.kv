@@ -1,0 +1,86 @@
+#:import c kivy.utils.get_color_from_hex
+#:import Scroll kivy.effects.scroll.ScrollEffect
+#:import SmartGridLayout data.classes.smart_grid_layout.SmartGridLayout
+
+<CardWaitingRoomScreen>:
+
+    back_btn: back_btn
+    title_label: title_label
+    main_layout: main_layout
+    cards_slider: cards_slider
+    cards_container: cards_container
+    approve_btn: approve_btn
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height - self.width / 4)
+
+    FloatLayout:
+        id: header
+        size_hint: (None, None)
+        size: (root.width * 0.92, root.width * 0.15)
+        pos: (root.width * 0.04, root.top - self.height - root.width * 0.04)
+
+        BackButton:
+            id: back_btn
+            size: (header.height, header.height)
+            x: header.x
+            top: header.top
+            on_release: root.discard()
+
+        Label:
+            id: title_label
+            size_hint: (0.5, None)
+            height: back_btn.height
+            text_size: self.size
+            y: header.top - self.height
+            x: back_btn.right + (- back_btn.right + approve_btn.x) / 2 - self.width / 2
+            text: "collected cards"
+            font_size: header.width * 0.7 * 0.1
+            color: c("#222222")
+            halign: "center"
+            valign: "middle"
+
+        ApproveButton:
+            id: approve_btn
+            size: (header.height, header.height)
+            top: header.top
+            x: header.right - self.width
+            on_release: root.proceed()
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (1, None)
+        height: root.height - root.width / 3.5
+        y: (root.width / 3.5 - root.width / 4) / 2
+
+        ScrollView:
+            id: cards_slider
+            size_hint: (0.9, 1)
+            do_scroll_x: False
+            effect_y: Scroll()
+            pos_hint: {"center_x": 0.5}
+
+            SmartGridLayout:
+                id: cards_container
+                cols: 1
+                size_hint: (1, None)
+                spacing: dp(15)
+
+    FloatLayout:
+        id: additional_layout
+        pos: (back_btn.x, back_btn.top - self.height)
+

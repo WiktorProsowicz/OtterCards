@@ -1,0 +1,155 @@
+#:import c kivy.utils.get_color_from_hex
+#:import Scroll kivy.effects.scroll.ScrollEffect
+#:import SmartGridLayout data.classes.smart_grid_layout.SmartGridLayout
+
+<CardWorkshopScreen>:
+
+    title_label: title_label
+    lines_container: lines_container
+    tags_container: tags_container
+    lines_slider: lines_slider
+    tags_slider: tags_slider
+    more_btn: more_btn
+    lines_label: lines_label
+    main_layout: main_layout
+    back_btn: back_btn
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height - self.width / 4)
+
+    FloatLayout:
+        id: header
+        pos: (root.width * 0.08, -root.width * 0.04)
+
+        BackButton:
+            id: back_btn
+            pos: (header.x, header.top - self.height)
+            on_release: root.leave_workshop("back")
+
+        Label:
+            id: title_label
+            size_hint: (0.5, None)
+            height: back_btn.height
+            text_size: self.size
+            y: header.top - self.height
+            x: back_btn.right + (- back_btn.right + approve_btn.x) / 2 - self.width / 2
+            text: ""
+            font_size: header.width * 0.8 * 0.12
+            color: c("#222222")
+            halign: "center"
+            valign: "middle"
+
+        ApproveButton:
+            id: approve_btn
+            pos: (header.right - root.width * 0.16 - self.width, header.top - self.height)
+            on_release: root.leave_workshop("approve")
+
+    FloatLayout:
+        id: main_layout
+        y: - dp(20)
+        size_hint: (1, None)
+        height: root.height - root.width / 4
+
+        FloatLayout:
+            id: lines_canvas
+            size_hint: (0.8, 0.75)
+            pos_hint: {"center_x": 0.5, "top": 1}
+
+            canvas.before:
+                Color:
+                    rgba: c("#6de3d1")
+
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [(20,20), (20,20), (20,20), (20,20)]
+
+            ScrollView:
+                id: lines_slider
+                do_scroll_x: False
+                size_hint: (0.95, 0.8)
+                pos_hint: {"center_x": 0.5, "y": 0.05}
+                effect_y: Scroll()
+
+                SmartGridLayout:
+                    id: lines_container
+                    cols: 1
+                    size_hint: (1, None)
+                    spacing: dp(10)
+
+            Label:
+                id: lines_label
+                font_size: lines_container.width / 10
+                text: ""
+                halign: "center"
+                valign: "middle"
+                size_hint: (1, 0.1)
+                pos_hint: {"center_x": 0.5, "top": 0.98}
+                color: c("#666666")
+
+                canvas:
+                    Color:
+                        rgba: c("#666666")
+                    Line:
+                        points: [(self.x, self.y), (self.right, self.y)]
+
+
+        Label:
+            size_hint: (1, 0.05)
+            text: "tags"
+            halign: "center"
+            color: c("#666666")
+            top: lines_canvas.y - main_layout.height * 0.01
+            font_size: main_layout.width / 13
+
+        FloatLayout:
+            id: tags_canvas
+            size_hint: (0.8, 0.1)
+            pos_hint: {"center_x": 0.5}
+            top: lines_canvas.y - main_layout.height * 0.07
+
+            canvas.before:
+                Color:
+                    rgba: c("#9df5d6")
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            ScrollView:
+                id: tags_slider
+                do_scroll_y: False
+                effect_x: Scroll()
+                size_hint: (0.95, 0.8)
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                SmartGridLayout:
+                    id: tags_container
+                    rows: 1
+                    size_hint: (None, 1)
+                    spacing: dp(10)
+
+
+    FloatLayout:
+        id: additional_layout
+        pos: (-root.width * 0.03, root.width * 0.03)
+        size: root.size
+
+        MoreButton:
+            id: more_btn
+            size_hint: (0.13, None)
+            pos_hint: {"right": 1}
+            y: additional_layout.y

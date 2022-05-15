@@ -1,0 +1,254 @@
+#:import c kivy.utils.get_color_from_hex
+#:import Scroll kivy.effects.scroll.ScrollEffect
+#:import SmartGridLayout data.classes.smart_grid_layout.SmartGridLayout
+#:import ClickableLabel data.classes.clickable_label.ClickableLabel
+#:import PresentationBox data.classes.presentation_box.PresentationBox
+#:import UtensilButton data.classes.utensils.UtensilButton
+
+<BoxDisplayScreen>:
+
+    base_box_widget: base_box_widget
+    back_btn: back_btn
+    created_lbl: created_lbl
+    cards_number_lbl: cards_number_lbl
+    cards_left_lbl: cards_left_lbl
+    tags_dropdown: tags_dropdown.__self__
+    left_slider: left_slider
+    right_slider: right_slider
+    tags_slider: tags_slider
+    pages: pages
+    tags_container: tags_container
+    left_container: left_container
+    right_container: right_container
+    left_invisible: left_invisible
+    right_invisible: right_invisible
+
+    canvas.before:
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 0
+            angle_end: 360
+            size: (self.width * 3, self.width)
+            pos: (self.center_x - self.width * 1.5, self.height - self.width / 1.5)
+
+    FloatLayout:
+        id: back_btn_layout
+        size_hint: (0.15, None)
+        height: self.width
+        pos_hint: {"x": 0.03}
+        y: root.height - self.height - root.width * 0.03
+
+        BackButton:
+            id: back_btn
+            size_hint: (0.9, 0.9)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            on_release: app.switch_screen("boxes_collection_screen", "right")
+
+    FloatLayout:
+        id: header
+        size_hint: (0.8, None)
+        height: root.width / 1.5 - dp(20)
+        pos_hint: {"top": 1, "right": 0.98}
+
+        Label:
+            id: cards_left_lbl
+            size_hint: (0.4, 0.3)
+            pos_hint: {"top": 1, "right": 1}
+            text: "cards learned: \nx"
+            color: c("#444444")
+            text_size: self.size
+            font_size: self.width * 0.15
+            halign: "center"
+            valign: "middle"
+
+        Label:
+            id: cards_number_lbl
+            size_hint: (0.4, 0.3)
+            pos_hint: {"center_y": 0.5, "right": 1}
+            text: "cards not learned: \nx"
+            color: c("#444444")
+            text_size: self.size
+            font_size: self.width * 0.15
+            halign: "center"
+            valign: "middle"
+
+        Label:
+            id: created_lbl
+            size_hint: (0.4, 0.3)
+            pos_hint: {"y": 0, "right": 1}
+            text: "created: \nxx.xx.xxxx"
+            color: c("#444444")
+            text_size: self.size
+            font_size: self.width * 0.15
+            halign: "center"
+            valign: "middle"
+
+        FloatLayout:
+            size_hint: (0.48, None)
+            height: self.width * 3/2
+            pos_hint: {"center_y": 0.5, "x": 0.02}
+
+            canvas.before:
+                Color:
+                    rgb: c("#444444")
+                    a: 0.4
+
+                RoundedRectangle:
+                    pos: (self.x - dp(2.5), self.y - dp(2.5))
+                    size: (self.width + dp(5), self.height + dp(5))
+
+            PresentationBox:
+                id: base_box_widget
+                size_hint: (1, 1)
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (0.95, None)
+        height: (root.height - root.width / 1.5 - dp(30))
+        pos_hint: {"center_x": 0.5}
+        y: dp(14)
+
+        PageLayout:
+            id: pages
+            size: main_layout.size
+            pos: main_layout.pos
+            swipe_threshold: .2
+            border: self.width * 0.1
+
+            FloatLayout:
+                id: left_page
+                size_hint: (1, 1)
+                canvas:
+                    Color:
+                        rgba: c("#a6e0d4")
+
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+
+                Button:
+                    id: left_invisible
+                    size_hint: (None, 0.1)
+                    pos_hint: {"right": 1, "top": 1}
+                    width: self.height
+                    background_color: 0, 0, 0, 0
+
+                Label:
+                    size_hint: (0.6, 0.1)
+                    pos_hint: {"top": 1, "center_x": 0.5}
+                    text: "cards in box"
+                    color: c("#444444")
+                    text_size: self.size
+                    font_size: self.width * 0.1
+                    halign: "center"
+                    valign: "middle"
+
+                    canvas:
+                        Color:
+                            rgba: c("#444444")
+                        Line:
+                            points: [(self.x, self.y), (self.right, self.y)]
+
+                ScrollView:
+                    id: left_slider
+                    size_hint: (0.95, 0.88)
+                    pos_hint: {"center_x": 0.5, "y": 0.01}
+                    do_scroll_x: False
+                    effect_y: Scroll()
+
+                    SmartGridLayout:
+                        id: left_container
+                        size_hint: (1, None)
+                        cols: 1
+                        spacing: dp(10)
+                        padding: [0, dp(10)]
+
+            FloatLayout:
+                id: right_page
+                size_hint: (1, 1)
+                canvas.before:
+                    Color:
+                        rgba: c("#97c9be")
+
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+
+                FloatLayout:
+                    id: dropdown_cnt
+                    size_hint: (0.8, 0.1)
+                    pos_hint: {"center_x": 0.5, "top": 1}
+                    canvas.before:
+                        Color:
+                            rgba: c("#8ee8da")
+
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+
+                    UtensilButton:
+                        id: down_btn
+                        size_hint: (None, 0.8)
+                        width: self.height
+                        pos_hint: {"center_y": 0.5, "right": 1}
+                        icon_src: app.directory + "/data/textures/down_icon.png"
+                        on_pos: self.draw()
+                        on_size: self.draw()
+                        on_release: tags_dropdown.open(dropdown_widget); root.enhance_dropdown()
+
+                    ScrollView:
+                        id: tags_slider
+                        size_hint: (None, 0.9)
+                        width: dropdown_cnt.width - down_btn.width - dp(5)
+                        pos_hint: {"center_y": 0.5}
+                        x: dropdown_cnt.x + dp(2.5)
+                        do_scroll_y: False
+                        effect_x: Scroll()
+                        bar_color: 0, 0, 0, 0
+                        bar_inactive_color: 0, 0, 0, 0
+
+                        SmartGridLayout:
+                            id: tags_container
+                            size_hint: (None, 1)
+                            rows: 1
+
+                    Button:
+                        id: dropdown_widget
+                        size_hint: (None, None)
+                        width: down_btn.width
+                        height: dp(1)
+                        background_color: (0, 0, 0, 0)
+                        pos: (dropdown_cnt.x - dropdown_cnt.width * 0.1, dropdown_cnt.y - dp(1))
+
+                    DropDown:
+                        id: tags_dropdown
+                        auto_width: False
+                        max_height: root.height / 2
+                        width: dropdown_cnt.width * 1.2
+                        effect_y: Scroll()
+                        min_state_time: 0.1
+
+                Button:
+                    id: right_invisible
+                    pos_hint: {"right": 1, "top": 1}
+                    size_hint: (None, 0.1)
+                    width: self.height
+                    background_color: 0, 0, 0, 0
+
+                ScrollView:
+                    id: right_slider
+                    size_hint: (0.95, 0.89)
+                    pos_hint: {"center_x": 0.5, "y": 0}
+                    do_scroll_x: False
+                    effect_y: Scroll()
+
+                    SmartGridLayout:
+                        id: right_container
+                        size_hint: (1, None)
+                        cols: 1
+                        spacing: dp(10)
+                        padding: [0, dp(10)]

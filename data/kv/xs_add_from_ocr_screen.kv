@@ -1,0 +1,200 @@
+#:import c kivy.utils.get_color_from_hex
+#:import CroppingRectangle data.classes.cropping_rectangle.CroppingRectangle
+#:import UtensilButton data.classes.utensils.UtensilButton
+
+<AddFromOcrScreen>:
+
+    #camera: camera.__self__
+    camera_layout: camera_layout
+    refresh_btn: refresh_btn
+    crop_btn: crop_btn
+    approve_btn: approve_btn
+    languages_dropdown: languages_dropdown.__self__
+    capture_btn: capture_btn.__self__
+    change_camera_btn: change_camera_btn.__self__
+    flip_h_btn: flip_h_btn.__self__
+    flip_v_btn: flip_v_btn.__self__
+    flip_right_btn: flip_right_btn.__self__
+
+    canvas.before:
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 4, self.width)
+            pos: (self.width / 2 - self.width * 4 / 2, self.height * 0.88)
+
+    FloatLayout:
+        id: header
+        size_hint: (0.9, 0.1)
+        pos_hint: {"center_x": 0.5, "top": 1}
+
+        BackButton:
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"x": 0, "center_y": 0.5}
+            on_release: app.switch_screen("previous", "inverted")
+
+        UtensilButton:
+            id: refresh_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"center_x": 0.3, "center_y": 0.5}
+            icon_src: app.directory + "/data/textures/swap_icon.png"
+            enabled_src: app.directory + "/data/textures/swap_icon.png"
+            on_pos: self.draw()
+            on_size: self.draw()
+
+        UtensilButton:
+            id: languages_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"center_x": 0.7, "center_y": 0.5}
+            icon_src: app.directory + "/data/textures/languages_icon.png"
+            on_pos: self.draw()
+            on_size: self.draw()
+            on_release: languages_dropdown.open(dropdown_widget); languages_dropdown.container.spacing = dp(10)
+
+        Button:
+            id: dropdown_widget
+            size_hint: (None, None)
+            width: languages_btn.width
+            height: dp(10)
+            background_color: (0, 0, 0, 0)
+            pos: (languages_btn.x, languages_btn.y - 10)
+
+        UtensilButton:
+            id: crop_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            icon_src: app.directory + "/data/textures/crop_icon.png"
+            enabled_src: app.directory + "/data/textures/crop_icon.png"
+            chosen_src: app.directory + "/data/textures/crop_icon_chosen.png"
+            on_pos: self.draw()
+            on_size: self.draw()
+
+        ApproveButton:
+            id: approve_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"right": 1, "center_y": 0.5}
+
+        DropDown:
+            id: languages_dropdown
+            auto_width: False
+            max_height: root.height / 2
+            width: approve_btn.right - languages_btn.x
+            effect_y: Scroll()
+
+    FloatLayout:
+        id: camera_layout
+        size_hint: (0.9, 0.8)
+        pos_hint: {"center_x": 0.5, "y": 0.05}
+        canvas.before:
+            Color:
+                rgba: c("#062d29")
+
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+            Color:
+                rgba: c("#0a6158")
+
+            Line:
+                rectangle: (self.x - dp(3), self.y - dp(3), self.width + dp(6), self.height + dp(6))
+                width: dp(3)
+
+        #Camera:
+            #id: camera
+            #resolution: camera_layout.size
+            #play: True
+            #pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+        Button:
+            id: capture_btn
+            background_color: (0, 0, 0, 0)
+            on_press: self.opacity = 0.8
+            on_release: self.opacity = 1; root.capture()
+            size_hint: (0.2, None)
+            height: self.width
+            pos_hint: {"center_x": 0.5}
+            center_y: camera_layout.y + camera_layout.width * 0.05
+            always_release: True
+
+            canvas:
+                Color:
+                    rgba: c("17876d")
+
+                Ellipse:
+                    size: self.size
+                    pos: self.pos
+                    angle_start: 0
+                    angle_end: 360
+
+                Color:
+                    rgba: c("219c7f")
+
+                Ellipse:
+                    size: (self.width / 3, self.height / 3)
+                    pos: (self.center_x - self.width / 3 / 2, self.center_y - self.height / 3 / 2)
+                    angle_start: 0
+                    angle_end: 360
+
+        Button:
+            id: change_camera_btn
+            background_color: (0, 0, 0, 0)
+            on_press: self.opacity = 0.8
+            on_release: self.opacity = 1; root.change_camera()
+            size_hint: (0.15, None)
+            height: self.width
+            pos_hint: {"right": 0.95}
+            center_y: camera_layout.y + camera_layout.width * 0.05
+
+            canvas:
+                Color:
+                    rgba: c("17876d")
+
+                Ellipse:
+                    size: self.size
+                    pos: self.pos
+                    angle_start: 0
+                    angle_end: 360
+
+            Image:
+                source: app.directory + "/data/textures/camera_icon.png"
+                size: (change_camera_btn.width / 1.5, change_camera_btn.height / 1.5)
+                pos: (change_camera_btn.center_x - change_camera_btn.width / 1.5 / 2, change_camera_btn.center_y - change_camera_btn.width / 1.5 / 2)
+
+        UtensilButton:
+            id: flip_h_btn
+            size_hint: (None, None)
+            height: camera_layout.width * 0.15
+            width: self.height
+            icon_src: app.directory + "/data/textures/flip_h_icon.png"
+            on_pos: self.draw()
+            on_size: self.draw()
+            on_release: root.flip_captured_image("h")
+
+        UtensilButton:
+            id: flip_v_btn
+            size_hint: (None, None)
+            height: camera_layout.width * 0.15
+            width: self.height
+            icon_src: app.directory + "/data/textures/flip_v_icon.png"
+            on_pos: self.draw()
+            on_size: self.draw()
+            on_release: root.flip_captured_image("v")
+
+        UtensilButton:
+            id: flip_right_btn
+            size_hint: (None, None)
+            height: camera_layout.width * 0.15
+            width: self.height
+            icon_src: app.directory + "/data/textures/flip_right_icon.png"
+            on_pos: self.draw()
+            on_size: self.draw()
+            on_release: root.flip_captured_image("right")

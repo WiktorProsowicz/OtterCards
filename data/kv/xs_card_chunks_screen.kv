@@ -1,0 +1,94 @@
+#:import c kivy.utils.get_color_from_hex
+#:import Scroll kivy.effects.scroll.ScrollEffect
+#:import SmartStackLayout data.classes.smart_stack_layout.SmartStackLayout
+#:import UtensilButton data.classes.utensils.UtensilButton
+
+<CardChunksScreen>:
+
+    back_btn: back_btn
+    slider_container: slider_container
+    slider: slider
+    bubble_layout: bubble_layout
+
+    canvas.before:
+        Color:
+            rgba: c("#54dec7")
+
+        RoundedRectangle:
+            size: (self.width * 0.95, self.height * 0.95)
+            pos: (self.width * 0.05 / 2, self.width * 0.05 / 2)
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height * 0.87)
+
+    FloatLayout:
+        id: header
+        size_hint: (0.9, 0.1)
+        pos_hint: {"center_x": 0.5, "top": 1}
+
+        BackButton:
+            id: back_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"x": 0, "center_y": 0.5}
+            on_release: root.discard()
+
+        Label:
+            size_hint: (0.7, 1)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: "create a card from chunks of text"
+            halign: "center"
+            font_size: self.height / 3
+            color: c("#444444")
+            text_size: self.size
+
+        ApproveButton:
+            id: approve_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"right": 1, "center_y": 0.5}
+            on_release: root.save()
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (0.9, None)
+        pos_hint: {"center_x": 0.5}
+        y: root.width * 0.05
+        height: root.height * 0.87 - root.width * 0.075
+
+        ScrollView:
+            id: slider
+            size_hint: (1, 1)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            do_scroll_x: False
+            effect_y: Scroll()
+            bar_color: (0, 0, 0, 0)
+            bar_inactive_color: (0, 0, 0, 0)
+
+            SmartStackLayout:
+                id: slider_container
+                size_hint: (1, None)
+                spacing: dp(10)
+                padding: [dp(5), dp(10)]
+                orientation: "lr-tb"
+
+    FloatLayout:
+        id: bubble_layout
+
+    FloatLayout:
+        id: additional_layout
+        pos: (-root.width * 0.05, root.width * 0.05)
+
+        IncreaseButton:
+            id: add_btn
+            size_hint: (0.15, None)
+            height: self.width
+            pos_hint: {"right": 1}
+            y: additional_layout.y
+            on_release: root.add_chunk()

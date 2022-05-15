@@ -1,0 +1,157 @@
+#:import c kivy.utils.get_color_from_hex
+#:import PresentationTag data.classes.presentation_tag.PresentationTag
+
+<TagWorkshopScreen>:
+
+    title_label: title_label
+    green_slider: green_slider
+    red_slider: red_slider
+    blue_slider: blue_slider
+    base_tag_widget: base_tag_widget
+    color_label: color_label
+    name_input: name_input
+    back_btn: back_btn
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height - self.width / 3)
+
+    FloatLayout:
+        id: header
+        pos: (root.width * 0.08, -root.width * 0.08)
+
+        BackButton:
+            id: back_btn
+            pos: (header.x, header.top - self.height)
+            on_release: root.leave_workshop("back")
+
+        Label:
+            id: title_label
+            size_hint: (0.5, None)
+            height: back_btn.height
+            text_size: self.size
+            y: header.top - self.height
+            x: back_btn.right + (- back_btn.right + approve_btn.x) / 2 - self.width / 2
+            text: ""
+            font_size: header.width * 0.8 * 0.12
+            color: c("#222222")
+            halign: "center"
+            valign: "middle"
+
+        ApproveButton:
+            id: approve_btn
+            pos: (header.right - root.width * 0.16 - self.width, header.top - self.height)
+            on_release: root.leave_workshop("approve")
+
+    FloatLayout:
+        y: -root.width / 3
+        id: main_layout
+        width: root.width
+
+        PresentationTag:
+            id: base_tag_widget
+            size_hint: (0.7, None)
+            font_size: main_layout.width / 10
+            top: main_layout.top - main_layout.width / 15
+            x: main_layout.center_x - self.width / 2
+            height: self.font_size * 1.2
+
+        FloatLayout:
+            id: tools_layout
+            size_hint: (0.9, None)
+            x: main_layout.center_x - self.width / 2
+            height: base_tag_widget.y - main_layout.width / 15 * 2
+            y: base_tag_widget.y - main_layout.width / 15 - self.height
+
+            Label:
+                id: name_label
+                text: "name"
+                size_hint: (0.5, None)
+                x: tools_layout.center_x - self.width / 2
+                top: tools_layout.top
+                font_size: base_tag_widget.font_size / 1.5
+                height: self.font_size * 1.2
+                halign: "center"
+                text_size: self.size
+                color: c("#1fc18d")
+
+            TextInput:
+                id: name_input
+                size_hint: (0.7, None)
+                x: tools_layout.center_x - self.width / 2
+                top: name_label.y - tools_layout.height / 50
+                multiline: False
+                font_size: name_label.font_size
+                height: self.font_size * 1.7
+                valign: "center"
+                halign: "left"
+                padding: (self.width / 15, 6)
+                foreground_color: c("#222222")
+                background_normal: app.directory + "/data/textures/tag_input_normal.png"
+                background_active: app.directory + "/data/textures/tag_input_focused.png"
+
+            Label:
+                id: color_label
+                size_hint: (0.5, None)
+                text: "color #xxxxxx"
+                x: tools_layout.center_x - self.width / 2
+                top: name_input.y - tools_layout.height / 10
+                font_size: name_label.font_size
+                height: self.font_size * 1.2
+                halign: "center"
+                text_size: self.size
+                color: c("#1fc18d")
+
+            Slider:
+                id: red_slider
+                size_hint: (0.7, None)
+                min: 0
+                max: 255
+                step: 1
+                x: tools_layout.center_x - self.width / 2
+                padding: tools_layout.height / 50
+                top: color_label.y - tools_layout.height / 50
+                height: self.cursor_height + self.padding
+                background_horizontal: app.directory + "/data/textures/red_slider.png"
+                cursor_image: app.directory + "/data/textures/red_cursor.png"
+
+            Slider:
+                id: green_slider
+                size_hint: (0.7, None)
+                min: 0
+                max: 255
+                step: 1
+                x: tools_layout.center_x - self.width / 2
+                padding: tools_layout.height / 50
+                top: red_slider.y - self.padding * 2
+                height: self.cursor_height + self.padding
+                background_horizontal: app.directory + "/data/textures/green_slider.png"
+                cursor_image: app.directory + "/data/textures/green_cursor.png"
+
+            Slider:
+                id: blue_slider
+                size_hint: (0.7, None)
+                min: 0
+                max: 255
+                step: 1
+                x: tools_layout.center_x - self.width / 2
+                padding: tools_layout.height / 50
+                top: green_slider.y - self.padding * 2
+                height: self.cursor_height + self.padding
+                background_horizontal: app.directory + "/data/textures/blue_slider.png"
+                cursor_image: app.directory + "/data/textures/blue_cursor.png"
+
+

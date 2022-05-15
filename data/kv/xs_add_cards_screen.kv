@@ -1,0 +1,90 @@
+#:import c kivy.utils.get_color_from_hex
+
+<AddCardsScreen>:
+
+    header: header
+    main_layout: main_layout
+    title_label: title_label
+    back_btn: back_btn
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height - self.width / 3)
+
+    FloatLayout:
+        id: header
+        size_hint: (0.9, None)
+        height: root.width / 3.5
+        pos_hint: {"center_x": 0.5}
+        y: root.height - self.height
+
+        FloatLayout:
+            size_hint: (1, 0.6)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+            BackButton:
+                id: back_btn
+                size_hint: (None, 0.9)
+                width: self.height
+                pos_hint: {"x": 0, "center_y": 0.5}
+                on_release: app.switch_screen("cards_collection_screen", "right")
+
+            Label:
+                id: title_label
+                size_hint: (None, None)
+                height: back_btn.height
+                width: header.right - back_btn.right - dp(10)
+                pos_hint: {"center_y": 0.5, "right": 1}
+                text: "add cards"
+                font_size: self.height * 0.6
+                text_size: self.size
+                color: c("#222222")
+                halign: "center"
+                valign: "middle"
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (0.7, None)
+        height: root.height - root.width / 3
+        pos_hint: {"center_x": 0.5}
+
+        FloatLayout:
+            size_hint: (1, 0.65)
+            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+
+            MenuButton:
+                text: "manually"
+                size_hint: (1, None)
+                pos_hint: {"top": 1, "center_x": 0.5}
+                on_release: root.add_manually()
+
+            MenuButton:
+                text: "from file"
+                size_hint: (1, None)
+                pos_hint: {"top": 0.73, "center_x": 0.5}
+                on_release: app.switch_screen("add_from_file_screen", "left")
+
+            MenuButton:
+                text: "from dictionary"
+                size_hint: (1, None)
+                pos_hint: {"y": 0.27, "center_x": 0.5}
+                on_release: app.switch_screen("add_from_dictionary_screen", "left")
+
+            MenuButton:
+                text: "from OCR scanner"
+                size_hint: (1, None)
+                pos_hint: {"y": 0, "center_x": 0.5}
+                on_release: app.switch_screen("add_from_ocr_screen", "left")
