@@ -13,7 +13,7 @@ class Flashcard:
             return False
 
     def __copy__(self):
-        card = Flashcard(id=self.id, creation_date=self.last_update, dev_tag=self.dev_tag,
+        card = Flashcard(id=self.id, creation_date=self.last_update,
                          def_lines=None, hidden_lines=None)
         card.hidden_lines = self.hidden_lines.copy()
         card.def_lines = self.def_lines.copy()
@@ -55,7 +55,7 @@ class Flashcard:
                     if tag not in self.tags:
                         self.tags.append(tag)
 
-        self.dev_tag = kwargs.get("dev_tag", None)
+        self.is_redundant = kwargs.get("is_redundant", False)
         self.last_update = kwargs.get("last_update", 0)
 
-        self.comp_nr = None
+        self.comp_nr = kwargs.get("comp_nr", None)

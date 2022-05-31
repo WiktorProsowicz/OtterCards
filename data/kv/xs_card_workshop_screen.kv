@@ -37,6 +37,7 @@
 
         BackButton:
             id: back_btn
+            size_hint: (0.12, None)
             pos: (header.x, header.top - self.height)
             on_release: root.leave_workshop("back")
 
@@ -55,6 +56,7 @@
 
         ApproveButton:
             id: approve_btn
+            size_hint: (0.12, None)
             pos: (header.right - root.width * 0.16 - self.width, header.top - self.height)
             on_release: root.leave_workshop("approve")
 

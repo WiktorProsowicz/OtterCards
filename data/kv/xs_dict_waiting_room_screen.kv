@@ -44,30 +44,33 @@
 
         BackButton:
             id: back_btn
-            size: (header.height, header.height)
+            size_hint: (None, None)
+            size: (header.height * 0.7, header.height * 0.7)
             x: header.x
             top: header.top
             on_release: root.discard()
+            pos_hint: {"center_y": 0.5}
 
         Label:
             id: title_label
-            size_hint: (0.5, None)
+            size_hint: (0.5, 1)
             height: back_btn.height
             text_size: self.size
-            y: header.top - self.height
-            x: back_btn.right + (- back_btn.right + approve_btn.x) / 2 - self.width / 2
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
             text: "collected results"
-            font_size: header.width * 0.7 * 0.1
+            font_size: header.width * 0.65 * 0.1
             color: c("#222222")
             halign: "center"
             valign: "middle"
 
         ApproveButton:
             id: approve_btn
-            size: (header.height, header.height)
+            size_hint: (None, None)
+            size: (header.height * 0.7, header.height * 0.7)
             top: header.top
             x: header.right - self.width
             on_release: root.proceed()
+            pos_hint: {"center_y": 0.5}
 
     FloatLayout:
         id: main_layout
@@ -114,6 +117,7 @@
                         cols: 1
                         size_hint: (1, None)
                         spacing: dp(15)
+                        padding: dp(5)
 
             FloatLayout:
                 size_hint: (1, 1)
@@ -145,6 +149,7 @@
                         cols: 1
                         size_hint: (1, None)
                         spacing: dp(15)
+                        padding: dp(5)
 
             FloatLayout:
                 size_hint: (1, 1)
@@ -176,6 +181,7 @@
                         cols: 1
                         size_hint: (1, None)
                         spacing: dp(15)
+                        padding: dp(5)
 
     FloatLayout:
         id: additional_layout

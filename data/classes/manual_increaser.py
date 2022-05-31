@@ -10,13 +10,12 @@ class ManualIncreaser(Widget):
     value = NumericProperty(0)
 
     def increase(self, *args):
-        self.value += 1
-        self.draw()
+        if self.max_value is not None and self.value < self.max_value:
+            self.value += 1
 
     def decrease(self, *args):
         if self.value > self.min_value:
             self.value -= 1
-            self.draw()
 
     def draw(self, *args):
         label_text = u'∞' if self.value == -1 else str(self.value)
@@ -40,9 +39,10 @@ class ManualIncreaser(Widget):
     def on_value(self, *args):
         self.draw()
 
-    def __init__(self, min_value=-1, **kwargs):
+    def __init__(self, min_value=-1, max_value=None, **kwargs):
         super(ManualIncreaser, self).__init__(**kwargs)
 
         self.font_size = None
 
         self.min_value = min_value
+        self.max_value = max_value

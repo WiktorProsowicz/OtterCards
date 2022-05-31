@@ -40,7 +40,7 @@
 
         BackButton:
             id: back_btn
-            size_hint: (None, 0.7)
+            size_hint: (None, 0.55)
             width: self.height
             pos_hint: {"x": 0, "center_y": 0.5}
             on_release: app.switch_screen("add_cards_screen", "right")
@@ -62,7 +62,7 @@
 
         ApproveButton:
             id: approve_btn
-            size_hint: (None, 0.7)
+            size_hint: (None, 0.55)
             width: self.height
             pos_hint: {"right": 1, "center_y": 0.5}
             on_release: root.submit()

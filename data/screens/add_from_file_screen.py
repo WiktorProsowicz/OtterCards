@@ -18,6 +18,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from ..data_processing import get_cards_from_file
 from kivy.app import App
+from ..classes.popups import loading_popup, ok_popup, tags_popup
 
 
 class AddFromFileScreen(Screen):
@@ -32,33 +33,16 @@ class AddFromFileScreen(Screen):
     main_layout = ObjectProperty(None)
 
     def submit(self):
-        workdir = Cache.get("app_info", "work_dir")
+
         if self.selected_file is None:
-            btn = Button(text="ok", color=get_color_from_hex("#444444"),
-                         font_size=self.title_label.font_size * 0.6,
-                         background_normal=workdir + "/data/textures/yes_button_normal.png",
-                         background_down=workdir + "/data/textures/yes_button_down.png", opacity=0.7)
-            warning_pop = Popup(title="you have to choose a file before processing",
-                                auto_dismiss=True,
-                                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                                title_color=get_color_from_hex("#444444"),
-                                background=workdir + "/data/textures/popup_background.png",
-                                title_size=self.title_label.font_size * 0.7, height=self.width * 0.9 / 2.5,
-                                content=btn, border=[0, 0, 0, 0])
-            btn.bind(on_release=warning_pop.dismiss)
+            warning_pop = ok_popup("you have to choose a file before processing", self.width, 0.9 / 2.5)
 
             warning_pop.open()
 
         else:
-            wheel = Image(source=workdir + "/data/textures/loading_screen.png",
-                          allow_stretch=True, pos_hint={"center_x": 0.5, "center_y": 0.5})
-            loading_pop = Popup(title="collecting cards...", auto_dismiss=False,
-                                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 1),
-                                title_color=get_color_from_hex("#444444"),
-                                background=workdir + "/data/textures/popup_background.png",
-                                title_size=self.title_label.font_size * 0.7, height=self.width * 0.9 / 2,
-                                content=wheel, border=[0, 0, 0, 0])
+            loading_pop = loading_popup("collecting cards...", self.width)
             loading_pop.open()
+
             Clock.schedule_once(lambda nt: self.pre_save_cards(), .2)
             Clock.schedule_once(lambda nt: loading_pop.dismiss(), .2)
 
@@ -82,11 +66,14 @@ class AddFromFileScreen(Screen):
 
         App.get_running_app().switch_screen("card_waiting_room_screen", "left")
 
-    def select_file(self, filepath):
+    def select_file(self, selection):
         # /// VALIDATION MAY BE NEEDED!
 
-        self.selected_file = filepath
-        self.filename_label.text = filepath
+        if not selection:
+            return
+
+        self.selected_file = selection[0]
+        self.filename_label.text = selection[0]
 
     def show_files(self):
         workdir = Cache.get("app_info", "work_dir")
@@ -99,20 +86,21 @@ class AddFromFileScreen(Screen):
         filechooser_popup = Popup(title="choose file", title_align="center", separator_color=(0, 0, 0, 1),
                                   size_hint=(0.9, 0.6), title_color=get_color_from_hex("#444444"),
                                   background=workdir + "/data/textures/popup_background.png",
-                                  title_size=self.title_label.font_size * 0.8, content=pop_content,
+                                  title_size=self.title_label.font_size, content=pop_content,
                                   border=[0, 0, 0, 0])
+
         btn = Button(text="submit", color=get_color_from_hex("#444444"),
-                     font_size=self.title_label.font_size * 0.6,
+                     font_size=self.title_label.font_size * 0.8,
                      background_normal=workdir + "/data/textures/yes_button_normal.png",
                      background_down=workdir + "/data/textures/yes_button_down.png", opacity=0.7,
-                     size_hint=(0.5, None), pos_hint={"center_x": 0.5})
+                     size_hint=(0.5, None), pos_hint={"center_x": 0.5}, height=self.title_label.font_size)
 
         pop_content.add_widget(filechooser)
         pop_content.add_widget(btn)
 
         btn.height = btn.font_size * 2.5
 
-        btn.bind(on_release=lambda btn: self.select_file(filechooser.selection[0]))
+        btn.bind(on_release=lambda btn: self.select_file(filechooser.selection))
         btn.bind(on_release=filechooser_popup.dismiss)
 
         filechooser_popup.open()
@@ -120,53 +108,11 @@ class AddFromFileScreen(Screen):
     def show_tags(self):
 
         # preparing tag popup
-        tag_container = SmartGridLayout(cols=1, spacing=dp(10), size_hint=(1, None), padding=[0, dp(10)])
-        slider = ScrollView(size=(self.main_layout.width * 0.9, self.main_layout.height * 0.5),
-                            do_scroll_x=False, effect_y=ScrollEffect(), bar_inactive_color=(0, 0, 0, 0),
-                            pos_hint={"y": 0}, bar_color=(0, 0, 0, 0))
-
         database_dir = Cache.get("app_info", "database_dir")
-        workdir = Cache.get("app_info", "work_dir")
-
-        slider.add_widget(tag_container)
-
-        tags_popup = Popup(title="choose tag", auto_dismiss=True,
-                           size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                           title_color=get_color_from_hex("#444444"),
-                           background=workdir + "/data/textures/popup_background.png",
-                           title_size=self.title_label.font_size * 0.8, content=slider,
-                           border=[0, 0, 0, 0])
-        tags_popup.height += slider.height + dp(20)
 
         not_names = [slider_tag.tag.name for slider_tag in self.slider_tags]
-        retrieved_tags = FlashcardDataBase.retrieve_tags(database_dir, not_names=not_names)
-
-        if retrieved_tags:
-            for index, tag in enumerate(retrieved_tags, 1):
-                slider_tag = SliderTag(tag, index)
-                slider_tag.bind(size=lambda obj, pos: obj.draw(), pos=lambda obj, pos: obj.adjust_style())
-                slider_tag.bind(pos=lambda obj, pos: tag_container.resize_v(),
-                                on_choose=self.add_tag)
-                slider_tag.bind(on_choose=lambda obj: tags_popup.dismiss())
-                tag_container.add_widget(slider_tag)
-
-        else:
-            text = "there are no tags left"
-            so_empty_lbl = Label(text=text, size_hint=(1, None),
-                                 pos_hint={"center_y": 0.5, "center_x": 0.5},
-                                 color=get_color_from_hex("#444444"), font_size=slider.width * 0.07)
-            tags_popup.separator_color = (0, 0, 0, 1)
-            tag_container.add_widget(so_empty_lbl)
-            tags_popup.height -= slider.height - so_empty_lbl.height
-
-        tag_container.resize_v()
-
-        if tag_container.height > slider.height:
-            slider.do_scroll_y = True
-        else:
-            slider.do_scroll_y = False
-
-        tags_popup.open()
+        tags_pop = tags_popup("choose tag", self.size, database_dir, self.add_tag, "there are no tags left", not_names)
+        tags_pop.open()
 
     def add_tag(self, v_slider_tag):
         if v_slider_tag.tag.name not in [slider_tag.tag.name for slider_tag in self.slider_tags]:
@@ -181,7 +127,7 @@ class AddFromFileScreen(Screen):
         for tag in self.slider_tags:
             self.tags_container.add_widget(tag)
             tag.bind(pos=tag.adjust_style, height=tag.adjust_style)
-            tag.bind(width=self.tags_container.resize_h, size=tag.draw)
+            tag.bind(width=self.tags_container.resize_h, size=tag.draw, pos=tag.draw)
 
         self.tags_container.resize_h()
 

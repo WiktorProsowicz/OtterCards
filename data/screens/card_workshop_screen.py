@@ -1,22 +1,15 @@
 from kivy.uix.screenmanager import Screen
 from kivy.cache import Cache
 from kivy.properties import ObjectProperty
-from data.flashcards.flashcard_database import FlashcardDataBase
+from data.flashcards.flashcard_database import FlashcardDataBase, LengthError
 from kivy.utils import get_color_from_hex
 from kivy.app import App
 from ..classes.smart_input import SmartInput
 from kivy.metrics import dp
 from ..classes.utensils import UtensilDropUp, UtensilButton
 from ..classes.horizontal_slider_tag import HorizontalSliderTag
-from kivy.uix.scrollview import ScrollView
-from kivy.effects.scroll import ScrollEffect
-from kivy.uix.popup import Popup
-from ..classes.smart_grid_layout import SmartGridLayout
-from ..classes.slider_tag import SliderTag
-from kivy.uix.label import Label
 from ..classes.utils import a_difference_b
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
+from ..classes.popups import ok_popup, yes_no_popup, tags_popup
 
 
 class CardWorkshopScreen(Screen):
@@ -34,23 +27,13 @@ class CardWorkshopScreen(Screen):
             database_f = Cache.get("app_info", "aux_database_dir")
         else:
             database_f = Cache.get("app_info", "database_dir")
-        workdir = Cache.get("app_info", "work_dir")
 
-        return_message = FlashcardDataBase.insert_cards(database_f, [self.base_card])
-        if return_message == "LengthError":
-            btn = Button(text="ok", color=get_color_from_hex("#444444"),
-                         font_size=self.title_label.font_size * 0.6,
-                         background_normal=workdir + "/data/textures/yes_button_normal.png",
-                         background_down=workdir + "/data/textures/yes_button_down.png", opacity=0.7)
-            warning_pop = Popup(title="some of the lines are too long! consider separating them into new ones",
-                                auto_dismiss=True,
-                                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                                title_color=get_color_from_hex("#444444"),
-                                background=workdir + "/data/textures/popup_background.png",
-                                title_size=self.title_label.font_size * 0.7, height=self.width * 0.9 / 2,
-                                content=btn, border=[0, 0, 0, 0])
-            btn.bind(on_release=warning_pop.dismiss)
+        try:
+            FlashcardDataBase.insert_cards(database_f, [self.base_card])
 
+        except LengthError:
+
+            warning_pop = ok_popup("some of the lines are too long! consider separating them into new ones", self.width)
             warning_pop.open()
 
         else:
@@ -70,8 +53,6 @@ class CardWorkshopScreen(Screen):
         else:
             base_same_init = True
 
-        workdir = Cache.get("app_info", "work_dir")
-
         if base_same_init:
             App.get_running_app().switch_screen("previous", "inverted")
 
@@ -79,32 +60,8 @@ class CardWorkshopScreen(Screen):
             self.save()
 
         elif mode == "back":
-            pop_content = BoxLayout(orientation="horizontal", spacing=dp(10))
-            yes_btn = Button(text="yes", color=get_color_from_hex("#444444"),
-                             font_size=self.title_label.font_size * 0.6,
-                             background_normal=workdir + "/data/textures/yes_button_normal.png",
-                             background_down=workdir + "/data/textures/yes_button_down.png", opacity=0.7)
-            no_btn = Button(text="no", color=get_color_from_hex("#444444"),
-                            font_size=self.title_label.font_size * 0.6,
-                            background_normal=workdir + "/data/textures/no_button_normal.png",
-                            background_down=workdir + "/data/textures/no_button_down.png", opacity=0.7)
-            pop_content.add_widget(yes_btn)
-            pop_content.add_widget(no_btn)
-
-            workdir = Cache.get("app_info", "work_dir")
-            info_pop = Popup(title="do you want to save changes?", content=pop_content, auto_dismiss=True,
-                             size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                             title_color=get_color_from_hex("#444444"),
-                             background=workdir + "/data/textures/popup_background.png",
-                             title_size=self.title_label.font_size * 0.6, height=self.width * 0.9 / 3,
-                             border=[0, 0, 0, 0])
-            pop_content.bind(on_press=info_pop.dismiss)
-            yes_btn.bind(on_release=lambda obj: self.save())
-            no_btn.bind(
-                on_release=lambda obj: App.get_running_app().switch_screen("previous", "inverted"))
-
-            yes_btn.bind(on_release=info_pop.dismiss)
-            no_btn.bind(on_release=info_pop.dismiss)
+            info_pop = yes_no_popup("do you want to save changes?", self.width, 0.45, lambda obj: self.save(),
+                                    lambda obj: App.get_running_app().switch_screen("previous", "inverted"))
 
             info_pop.open()
 
@@ -165,53 +122,12 @@ class CardWorkshopScreen(Screen):
         if self.utensils.open:
             self.utensils.toggle(None)
 
-        # preparing tag popup
-        tag_container = SmartGridLayout(cols=1, spacing=dp(10), size_hint=(1, None), padding=[0, dp(10)])
-        slider = ScrollView(size=(self.main_layout.width * 0.9, self.main_layout.height * 0.5),
-                            do_scroll_x=False, effect_y=ScrollEffect(), bar_inactive_color=(0, 0, 0, 0),
-                            pos_hint={"y": 0}, bar_color=(0, 0, 0, 0))
-
+        not_names = self.base_card.tags.copy()
         database_dir = Cache.get("app_info", "database_dir")
-        workdir = Cache.get("app_info", "work_dir")
 
-        slider.add_widget(tag_container)
-
-        tags_popup = Popup(title="choose tag", auto_dismiss=True,
-                           size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 1),
-                           title_color=get_color_from_hex("#444444"),
-                           background=workdir + "/data/textures/popup_background.png",
-                           title_size=self.title_label.font_size * 0.8, content=slider,
-                           border=[0, 0, 0, 0])
-        tags_popup.height += slider.height + dp(20)
-
-        retrieved_tags = FlashcardDataBase.retrieve_tags(database_dir, not_names=self.base_card.tags.copy())
-
-        if retrieved_tags:
-            for index, tag in enumerate(retrieved_tags, 1):
-                slider_tag = SliderTag(tag, index)
-                slider_tag.bind(size=lambda obj, pos: obj.draw(), pos=lambda obj, pos: obj.adjust_style())
-                slider_tag.bind(pos=lambda obj, pos: tag_container.resize_v(),
-                                on_choose=lambda obj: self.add_tag(obj))
-                slider_tag.bind(on_choose=lambda obj: tags_popup.dismiss())
-                tag_container.add_widget(slider_tag)
-
-        else:
-            text = "there are no tags left"
-            so_empty_lbl = Label(text=text, size_hint=(1, None),
-                                 pos_hint={"center_y": 0.5, "center_x": 0.5},
-                                 color=get_color_from_hex("#444444"), font_size=self.lines_slider.width * 0.07)
-            tags_popup.separator_color = (0, 0, 0, 1)
-            tag_container.add_widget(so_empty_lbl)
-            tags_popup.height -= slider.height - so_empty_lbl.height
-
-        tag_container.resize_v()
-
-        if tag_container.height > slider.height:
-            slider.do_scroll_y = True
-        else:
-            slider.do_scroll_y = False
-
-        tags_popup.open()
+        tags_pop = tags_popup("choose tag", self.size, database_dir, self.add_tag,
+                              "there are no tags left", not_names)
+        tags_pop.open()
 
     def swap(self):
         self.update_card()

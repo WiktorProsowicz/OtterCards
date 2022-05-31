@@ -102,7 +102,7 @@ class UtensilDropUp(BoxLayout):
     def __init__(self, **kwargs):
         super(UtensilDropUp, self).__init__(**kwargs)
         self.orientation = "vertical"
-        self.spacing = dp(10)
+        self.spacing = dp(20)
 
         self.open = False
         self.active = True

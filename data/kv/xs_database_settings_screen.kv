@@ -63,7 +63,7 @@
         FloatLayout:
             size_hint: (0.8, None)
             height: main_layout.height * 0.25
-            pos_hint: {"top": 0.93, "center_x": 0.5}
+            pos_hint: {"top": 0.97, "center_x": 0.5}
 
             canvas:
                 Color:
@@ -112,7 +112,7 @@
 
         Button:
             size_hint: (0.6, 0.07)
-            pos_hint: {"center_x": 0.5, "top": 0.65}
+            pos_hint: {"center_x": 0.5, "top": 0.69}
             background_normal: app.directory + "/data/textures/yes_button_normal.png"
             background_down: app.directory + "/data/textures/yes_button_down.png"
             color: c("#444444")
@@ -124,7 +124,7 @@
         FloatLayout:
             size_hint: (0.8, None)
             height: main_layout.height * 0.25
-            pos_hint: {"top": 0.5, "center_x": 0.5}
+            pos_hint: {"top": 0.53, "center_x": 0.5}
 
             canvas:
                 Color:
@@ -172,11 +172,23 @@
 
         Button:
             size_hint: (0.6, 0.07)
-            pos_hint: {"center_x": 0.5, "top": 0.22}
+            pos_hint: {"center_x": 0.5, "top": 0.25}
             background_normal: app.directory + "/data/textures/yes_button_normal.png"
             background_down: app.directory + "/data/textures/yes_button_down.png"
             color: c("#444444")
             text: "upload backup"
             font_size: title_label.font_size * 0.6
             on_release: root.upload_backup()
+            opacity: 0.6
+
+
+        Button:
+            size_hint: (0.8, 0.07)
+            pos_hint: {"center_x": 0.5, "top": 0.1}
+            background_normal: app.directory + "/data/textures/no_button_normal.png"
+            background_down: app.directory + "/data/textures/no_button_down.png"
+            color: c("#444444")
+            text: "clear database"
+            font_size: title_label.font_size * 0.6
+            on_release: root.warn_before_clearing()
             opacity: 0.6

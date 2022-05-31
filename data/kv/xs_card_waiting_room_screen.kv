@@ -36,18 +36,19 @@
 
         BackButton:
             id: back_btn
-            size: (header.height, header.height)
+            size_hint: (None, None)
+            size: (header.height, header.height * 0.7)
             x: header.x
             top: header.top
             on_release: root.discard()
+            pos_hint: {"center_y": 0.5}
 
         Label:
             id: title_label
             size_hint: (0.5, None)
             height: back_btn.height
             text_size: self.size
-            y: header.top - self.height
-            x: back_btn.right + (- back_btn.right + approve_btn.x) / 2 - self.width / 2
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
             text: "collected cards"
             font_size: header.width * 0.7 * 0.1
             color: c("#222222")
@@ -56,10 +57,12 @@
 
         ApproveButton:
             id: approve_btn
-            size: (header.height, header.height)
+            size_hint: (None, None)
+            size: (header.height, header.height * 0.7)
             top: header.top
             x: header.right - self.width
             on_release: root.proceed()
+            pos_hint: {"center_y": 0.5}
 
     FloatLayout:
         id: main_layout
@@ -73,12 +76,14 @@
             do_scroll_x: False
             effect_y: Scroll()
             pos_hint: {"center_x": 0.5}
+            bar_color: (0, 0, 0, 0)
 
             SmartGridLayout:
                 id: cards_container
                 cols: 1
                 size_hint: (1, None)
                 spacing: dp(15)
+                padding: dp(5)
 
     FloatLayout:
         id: additional_layout

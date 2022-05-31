@@ -1,0 +1,278 @@
+#:import c kivy.utils.get_color_from_hex
+#:import DampedScroll kivy.effects.dampedscroll.DampedScrollEffect
+#:import Scroll kivy.effects.scroll.ScrollEffect
+#:import SmartGridLayout data.classes.smart_grid_layout.SmartGridLayout
+
+<BackupContentScreen>:
+
+    back_btn: back_btn
+    cards_btn: cards_btn
+    boxes_btn: boxes_btn
+    tags_btn: tags_btn
+    sliders_carousel: sliders_carousel
+
+    cards_slider: cards_slider
+    cards_container: cards_container
+
+    tags_slider: tags_slider
+    tags_container: tags_container
+
+    boxes_slider: boxes_slider
+    boxes_container: boxes_container
+    box_cards_slider: box_cards_slider
+    box_cards_container: box_cards_container
+
+    left_invisible: left_invisible
+    right_invisible: right_invisible
+
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+        Color:
+            rgba: c("#1fc1ab")
+
+        Ellipse:
+            angle_start: 270
+            angle_end: 90
+            size: (self.width * 3, self.width)
+            pos: (self.width / 2 - self.width * 3 / 2, self.height - self.width / 4)
+
+    FloatLayout:
+        id: header
+        size_hint: (0.9, 0.1)
+        pos_hint: {"center_x": 0.5, "top": 1}
+
+        BackButton:
+            id: back_btn
+            size_hint: (None, 0.6)
+            width: self.height
+            pos_hint: {"x": 0, "center_y": 0.5}
+            on_release: root.discard()
+
+        Label:
+            size_hint: (0.7, 1)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: "backup elements"
+            halign: "center"
+            valign: "middle"
+            font_size: self.height / 3
+            color: c("#444444")
+            text_size: self.size
+
+        ApproveButton:
+            id: approve_btn
+            size_hint: (None, 0.6)
+            width: self.height
+            pos_hint: {"right": 1, "center_y": 0.5}
+            on_release: root.save()
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (1, None)
+        height: root.height - root.width / 4 - dp(20)
+        pos_hint: {"center_x": 0.5}
+        y: dp(10)
+
+        BoxLayout:
+            id: labels
+            direction: "horizontal"
+            size_hint: (0.9, 0.08)
+            pos_hint: {"center_x": 0.5, "top": 1}
+            spacing: dp(10)
+
+            LanguageButton:
+                id: cards_btn
+                size_hint: (0.3, 1)
+                text: "cards"
+                allow_no_selection: False
+                group: "labels"
+                on_press: sliders_carousel.load_slide(slide1)
+                state: "down"
+
+            LanguageButton:
+                id: tags_btn
+                size_hint: (0.3, 1)
+                text: "tags"
+                allow_no_selection: False
+                group: "labels"
+                on_press: sliders_carousel.load_slide(slide2)
+
+            LanguageButton:
+                id: boxes_btn
+                size_hint: (0.3, 1)
+                text: "boxes"
+                allow_no_selection: False
+                group: "labels"
+                on_press: sliders_carousel.load_slide(slide3)
+
+        Carousel:
+            id: sliders_carousel
+            direction: "right"
+            pos_hint: {"center_x": 0.5, "y": 0}
+            size_hint: (1, 0.91)
+            on_current_slide: root.on_slide_change(self.index)
+            anim_cancel_duration: 0.2
+            ignore_perpendicular_swipes: True
+            scroll_timeout: 50
+            scroll_distance: dp(10)
+            min_move: 0.1
+
+            FloatLayout:
+                id: slide1
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                size_hint: (0.9, 0.95)
+                canvas.before:
+                    Color:
+                        rgba: c("#c7f0e5")
+
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+
+                ScrollView:
+                    id: cards_slider
+                    size_hint: (0.95, 1)
+                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                    do_scroll_x: False
+                    effect_y: Scroll()
+                    bar_color: (0, 0, 0, 0)
+                    bar_inactive_color: (0, 0, 0, 0)
+
+                    SmartGridLayout:
+                        id: cards_container
+                        cols: 1
+                        spacing: dp(10)
+                        size_hint: (1, None)
+                        padding: (0, dp(10))
+
+            FloatLayout:
+                id: slide2
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                size_hint: (0.9, 0.95)
+                canvas.before:
+                    Color:
+                        rgba: c("#c7f0e5")
+
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+
+                ScrollView:
+                    id: tags_slider
+                    size_hint: (0.95, 1)
+                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                    do_scroll_x: False
+                    effect_y: Scroll()
+                    bar_color: (0, 0, 0, 0)
+                    bar_inactive_color: (0, 0, 0, 0)
+
+                    SmartGridLayout:
+                        id: tags_container
+                        cols: 1
+                        spacing: dp(10)
+                        size_hint: (1, None)
+                        padding: [dp(5), dp(10)]
+
+
+            FloatLayout:
+                id: slide3
+
+                FloatLayout:
+                    pos_hint: {"x": 0.01, "center_y": 0.5}
+                    size_hint: (0.33, 0.95)
+                    canvas.before:
+                        Color:
+                            rgba: c("#c7f0e5")
+
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+
+                    ScrollView:
+                        id: boxes_slider
+                        size_hint: (0.8, 1)
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                        do_scroll_x: False
+                        effect_y: Scroll()
+                        bar_color: (0, 0, 0, 0)
+                        bar_inactive_color: (0, 0, 0, 0)
+
+                        SmartGridLayout:
+                            id: boxes_container
+                            cols: 1
+                            spacing: dp(10)
+                            size_hint: (1, None)
+                            padding: [0, dp(10)]
+
+                FloatLayout:
+                    pos_hint: {"right": 0.99, "center_y": 0.5}
+                    size_hint: (0.66, 0.95)
+                    canvas.before:
+                        Color:
+                            rgba: c("#abdbce")
+
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+
+                    Label:
+                        id: box_label
+                        text: "cards in box"
+                        size_hint: (0.9, 0.1)
+                        pos_hint: {"center_x": 0.5, "top": 1}
+                        font_size: self.height * 0.4
+                        text_size: self.size
+                        halign: "center"
+                        valign: "center"
+                        color: c("#444444")
+
+                        canvas.before:
+                            Color:
+                                rgba: c("#62a694")
+
+                            RoundedRectangle:
+                                size: self.size
+                                pos: self.pos
+
+                    ScrollView:
+                        id: box_cards_slider
+                        size_hint: (0.95, 0.9)
+                        pos_hint: {"center_x": 0.5, "y": 0}
+                        do_scroll_x: False
+                        effect_y: Scroll()
+                        bar_color: (0, 0, 0, 0)
+                        bar_inactive_color: (0, 0, 0, 0)
+
+                        SmartGridLayout:
+                            id: box_cards_container
+                            cols: 1
+                            spacing: dp(10)
+                            size_hint: (1, None)
+                            padding: [0, dp(10)]
+
+
+    FloatLayout:
+        id: additional_layout
+        size_hint: (0.92, 1)
+        pos_hint: {"center_x": 0.5}
+        y: root.width * 0.04
+
+        Button:
+            id: right_invisible
+            size_hint: (0.15, None)
+            height: dp(2)
+            pos_hint: {"y": 0, "right": 1}
+            background_color: (0, 0, 0, 0)
+
+        Button:
+            id: left_invisible
+            size_hint: (0.15, None)
+            height: dp(2)
+            pos_hint: {"y": 0, "x": 0}
+            background_color: (0, 0, 0, 0)

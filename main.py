@@ -16,23 +16,10 @@ from kivy.core.window import Window
 import ctypes
 
 # importing screens
-from data.screens.main_screen import MainScreen
-from data.screens.cards_screen import CardsScreen
-from data.screens.tags_collection_screen import TagsCollectionScreen
-from data.screens.tag_workshop_screen import TagWorkshopScreen
-from data.screens.cards_collection_screen import CardsCollectionScreen
-from data.screens.add_cards_screen import AddCardsScreen
-from data.screens.card_workshop_screen import CardWorkshopScreen
-from data.screens.add_from_file_screen import AddFromFileScreen
-from data.screens.card_waiting_room_screen import CardWaitingRoomScreen
-from data.screens.add_from_dictionary_screen import AddFromDictionaryScreen
-from data.screens.dict_waiting_room_screen import DictWaitingRoomScreen
-from data.screens.add_from_ocr_screen import AddFromOcrScreen
-from data.screens.card_chunks_screen import CardChunksScreen
-from data.screens.boxes_collection_screen import BoxesCollectionScreen
-from data.screens.box_display_screen import BoxDisplayScreen
-from data.screens.box_workshop_screen import BoxWorkshopScreen
-from data.screens.database_settings_screen import DatabaseSettingsScreen
+from data.screens import AddCardsScreen, AddFromDictionaryScreen, AddFromFileScreen, AddFromOcrScreen, BackupContentScreen, \
+    BoxDisplayScreen, BoxWorkshopScreen, BoxesCollectionScreen, CardChunksScreen, CardWaitingRoomScreen, \
+    CardWorkshopScreen, CardsCollectionScreen, CardsScreen, DatabaseSettingsScreen, DictWaitingRoomScreen, \
+    MainScreen, RevisingScreen, RevisingSettingsScreen, TagWorkshopScreen, TagsCollectionScreen
 
 from data.flashcards.flashcard_database import FlashcardDataBase
 
@@ -105,6 +92,7 @@ class OtterCardsApp(App):
         Cache.register("card_chunks")   # new_chunk
         Cache.register("box_display")   # base_box
         Cache.register("box_workshop")   # base_box
+        Cache.register("revising")  # box, compartment, show_def, dump_boxes
         # ...
 
         # saving values to app_info
@@ -128,7 +116,7 @@ class OtterCardsApp(App):
             Config.set("graphics", "height", 736)
             # /////////////////////////////
 
-            Config.write()
+            # Config.write()
 
         else:
             Cache.append("app_info", "rootpath", "/storage/emulated/0")
@@ -167,7 +155,8 @@ class OtterCardsApp(App):
                         "cards_collection_screen", "add_cards_screen", "card_workshop_screen", "add_from_file_screen",
                         "card_waiting_room_screen", "add_from_dictionary_screen", "dict_waiting_room_screen",
                         "add_from_ocr_screen", "card_chunks_screen", "boxes_collection_screen", "box_display_screen",
-                        "box_workshop_screen", "database_settings_screen"]  # ...
+                        "box_workshop_screen", "database_settings_screen", "backup_content_screen",
+                        "revising_settings_screen", "revising_screen"]  # ...
 
         path_to_kv = Cache.get("app_info", "work_dir") + "/data/kv/" + Cache.get("app_info", "size_prefix") + "_"
         kv_filenames = [path_to_kv + name + ".kv" for name in screen_names]
@@ -194,7 +183,10 @@ class OtterCardsApp(App):
                        BoxesCollectionScreen(name="boxes_collection_screen"),
                        BoxDisplayScreen(name="box_display_screen"),
                        BoxWorkshopScreen(name="box_workshop_screen"),
-                       DatabaseSettingsScreen(name="database_settings_screen")]
+                       DatabaseSettingsScreen(name="database_settings_screen"),
+                       BackupContentScreen(name="backup_content_screen"),
+                       RevisingSettingsScreen(name="revising_settings_screen"),
+                       RevisingScreen(name="revising_screen")]
 
         self.window_manager = WindowManager(transition=SlideTransition())
 
@@ -203,17 +195,7 @@ class OtterCardsApp(App):
         # ...
 
         # /// dev //////////////////////////////////////////
-        # self.window_manager.current = "add_cards_screen"
-        # chunk = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. \n" \
-        #         "Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, \n" \
-        #         "nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, \n" \
-        #         "pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, \n" \
-        #         "vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. \n" \
-        #         "Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus."
-        #
-        # Cache.append("card_chunks", "new_chunk", chunk)
-        # self.window_manager.current = "card_chunks_screen"
-        # self.window_manager.current = "boxes_collection_screen"
+
         # /////////////////////////////////////////////////
 
         Window.bind(on_keyboard=self.go_back)

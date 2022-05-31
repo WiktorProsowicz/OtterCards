@@ -55,7 +55,8 @@ class HorizontalSliderTag(Widget):
             RoundedRectangle(size=self.size, pos=self.pos, radius=[(r, r), (r, r), (r, r), (r, r)])
             Color(rgba=get_color_from_hex("#" + self.color))
             Rectangle(size=(self.core_l.texture.width, self.core_l.texture.height),
-                      pos=(self.center_x - self.core_l.texture.width / 2, self.y + self.height / 2 - self.core_l.texture.height / 2),
+                      pos=(self.x + self.width / 2 - self.core_l.texture.width / 2,
+                           self.y + self.height / 2 - self.core_l.texture.height / 2),
                       texture=self.core_l.texture)
 
     def __init__(self, tag: Tag, **kwargs):

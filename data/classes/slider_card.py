@@ -1,7 +1,7 @@
 from kivy.uix.widget import Widget
 from kivy.metrics import dp
 from kivy.core.text import Label as CoreLabel
-from kivy.graphics import Color, RoundedRectangle, Rectangle, Line
+from kivy.graphics import Color, RoundedRectangle, Rectangle, Line, Ellipse
 from kivy.utils import get_color_from_hex
 from data.flashcards.flashcard_database import Flashcard
 from kivy.animation import AnimationTransition, Animation
@@ -52,14 +52,15 @@ class SliderCard(Widget):
 
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
-            Clock.schedule_once(self._do_hold, .3)
-            self.dispatch("on_choose")
+            Clock.schedule_once(self._do_hold, .15)     # card is held after specific time
+            Clock.schedule_once(lambda nt: touch.ungrab(self), .15)  # after specific time touch up won't trigger on_choose
             touch.grab(self)
             return super(SliderCard, self).on_touch_down(touch)
 
     def on_touch_up(self, touch):
         if touch.grab_current is self:
             touch.ungrab(self)
+            self.dispatch("on_choose")
             Clock.unschedule(self._do_hold)
             return super(SliderCard, self).on_touch_up(touch)
 
@@ -161,16 +162,17 @@ class SliderCard(Widget):
         if not self.shortened:
             with self.canvas.before:
                 Color(rgba=get_color_from_hex("#0e7d52"))
-                Line(width=1, rounded_rectangle=(self.x + 1, self.y + 1, self.width - 2, self.height - 2, 20))
+                Line(width=2, rounded_rectangle=(self.x + 1, self.y + 1, self.width - 2, self.height - 2, 20))
 
-        if self.flashcard.dev_tag is not None:
-            dev_label = CoreLabel(text=self.flashcard.dev_tag, font_size=self.width / 28)
+        if self.flashcard.is_redundant:
+            dev_label = CoreLabel(text="R", font_size=self.width / 20)
             dev_label.refresh()
 
             with self.canvas.before:
-                Color(rgba=get_color_from_hex("#8f3b1f"))
+                Color(rgb=get_color_from_hex("#8f3b1f"))
                 Rectangle(size=(dev_label.texture.width, dev_label.texture.height),
-                          pos=(self.right - dev_label.texture.width - dp(10), self.top - dev_label.texture.height),
+                          pos=(self.right - dev_label.texture.height - dp(5),
+                               self.top - dev_label.texture.height - dp(5)),
                           texture=dev_label.texture)
 
     def refresh_info(self):

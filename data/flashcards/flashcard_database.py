@@ -8,6 +8,7 @@ from .flashcard import Flashcard
 from .box import Box
 from data.classes.utils import a_difference_b
 from datetime import datetime
+from .flashcards_exceptions import UniqueNameError, LengthError, ColorError
 
 
 class FlashcardDataBase:
@@ -15,10 +16,10 @@ class FlashcardDataBase:
     """
     Class created to handle database and almost entirely separate sql-related code from app's one.
     All methods are static to maintain style from app-wide functionalities like Cache, Config etc.
-    Important returned values from 'insert' functions:
+    Important exceptions in 'insert' functions:
         ColorError - when is_viable_color function returns False
         LengthError - reparation of sql problem with sticking to fixed binary data lengths, raised when passed string is too long
-        NameError - when unique constraint is being breached
+        UniqueNameError - when unique constraint is being breached
     """
 
     @staticmethod
@@ -61,6 +62,39 @@ class FlashcardDataBase:
 
             return normalized if columns_nmb > 1 else normalized[0]
 
+    @staticmethod
+    def is_card_in_box(database: str, flashcard: Flashcard, box: Box) -> bool:
+        if not os.path.isfile(database):
+            FlashcardDataBase.create_database(database)
+
+        with sqlite3.connect(database) as connection:
+            cursor = connection.cursor()
+
+            get_card_info_q = """
+                SELECT * FROM cards_in_boxes WHERE box_id = ? AND card_id = ?;
+            """
+            args = (box.id, flashcard.id)
+
+            if cursor.execute(get_card_info_q, args).fetchall():
+                return True
+
+            else:
+                return False
+
+    @staticmethod
+    def get_box_card_relations(database: str):
+        if not os.path.isfile(database):
+            FlashcardDataBase.create_database(database)
+
+        with sqlite3.connect(database) as connection:
+            cursor = connection.cursor()
+
+            get_rel_q = """
+                SELECT box_id, card_id, comp_nr FROM cards_in_boxes; 
+            """
+
+            return cursor.execute(get_rel_q).fetchall()
+
     """
     In this method flashcards are to be searched in original database, though they come from auxiliary one. 
     Therefore equality_index equal to 1 is enough to mark card as redundant.
@@ -81,23 +115,121 @@ class FlashcardDataBase:
                 if not a_difference_b(encoded_lines, group) and not a_difference_b(group, encoded_lines):
                     equality_index += 1
 
-            flashcard.dev_tag = "redundant" if equality_index > 0 else None
+            flashcard.is_redundant = True if equality_index > 0 else False
 
     @staticmethod
-    def upload_backup(filename: str) -> dict:
+    def mark_redundant_boxes(database: str, boxes: list):
+        if not os.path.isfile(database):
+            FlashcardDataBase.create_database(database)
 
-        if not os.path.isfile(filename):
-            print("aaaa")
+        with sqlite3.connect(database) as connection:
+            cursor = connection.cursor()
+
+            boxes_count_q = """
+                    SELECT COUNT(id) FROM boxes WHERE name = ?;
+             """
+
+            for box in boxes:
+                args = (box.name.encode("utf-8"), )
+                result = FlashcardDataBase.normalize_result(cursor.execute(boxes_count_q, args).fetchall())[0]
+
+                if result > 0:
+                    box.is_redundant = True
+
+    @staticmethod
+    def upload_backup(aux_database: str, filename: str):
+
+        if not os.path.isfile(aux_database):
+            FlashcardDataBase.create_database(aux_database)
+
+        # clearing auxiliary database to ensure that no additional information would be gathered while processing data
+        FlashcardDataBase.clear_database(aux_database)
 
         with open(filename, "r", encoding="utf-8") as file:
             cards_info, tags_info, boxes_info = [], [], []
             content_lines_info, cards_in_tags_info, cards_in_boxes_info = [], [], []
 
-            cards_nr = int(file.readline().rstrip())
-            for i in range(cards_nr):
+            # first line
+            file.readline()
+
+            lines_nr = int(file.readline())
+            for i in range(lines_nr):
                 cards_info.append(tuple(file.readline().strip().split("\t")))
 
-            print(cards_info)
+            lines_nr = int(file.readline())
+            for i in range(lines_nr):
+                boxes_info.append(tuple(file.readline().strip().split("\t")) + (file.readline().strip('\n'),))
+
+            lines_nr = int(file.readline())
+            for i in range(lines_nr):
+                tags_info.append(tuple(file.readline().strip().split("\t")) + (file.readline().strip('\n'),))
+
+            lines_nr = int(file.readline())
+            for i in range(lines_nr):
+                content_lines_info.append(tuple(file.readline().strip().split("\t")) + (file.readline().strip('\n'),))
+
+            lines_nr = int(file.readline())
+            for i in range(lines_nr):
+                cards_in_boxes_info.append(tuple(file.readline().strip().split("\t")))
+
+            lines_nr = int(file.readline())
+            for i in range(lines_nr):
+                cards_in_tags_info.append(tuple(file.readline().strip().split("\t")))
+
+        with sqlite3.connect(aux_database) as connection:
+            cursor = connection.cursor()
+
+            insert_q = """
+                    INSERT INTO cards (id, last_update) VALUES (?, ?);
+            """
+            for card_id, last_update in cards_info:
+                cursor.execute(insert_q, (int(card_id), int(last_update)))
+
+            insert_q = """
+                    INSERT INTO boxes (id, color, nr_compartments, creation_date, last_update, special, cards_left, name)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            """
+            for box_id, color, nr_compartments,  creation_date, last_update, special, cards_left, name in boxes_info:
+                name = name.encode(encoding="utf-8", errors="replace")
+                while len(name) > 150:
+                    name = name[:-1]
+
+                cursor.execute(insert_q, (int(box_id), color, int(nr_compartments), int(creation_date),
+                                          int(last_update), bool(int(special)), int(cards_left), name))
+
+            insert_q = """
+                    INSERT INTO tags (id, color, last_update, name) VALUES (?, ?, ?, ?);
+            """
+            for tag_id, color, last_update, name in tags_info:
+                name = name.encode(encoding="utf-8", errors="replace")
+                while len(name) > 150:
+                    name = name[:-1]
+
+                cursor.execute(insert_q, (int(tag_id), color, int(last_update), name))
+
+            insert_q = """
+                    INSERT INTO content_lines (is_def, card_id, text) VALUES (?, ?, ?);
+            """
+            for card_id, is_def, text in content_lines_info:
+                text = text.encode(encoding="utf-8", errors="replace")
+                while len(text) > 1000:
+                    text = text[:-1]
+
+                cursor.execute(insert_q, (bool(int(is_def)), int(card_id), text))
+
+            insert_q = """
+                    INSERT INTO cards_in_tags (card_id, tag_id) VALUES (?, ?);
+            """
+            for card_id, tag_id in cards_in_tags_info:
+                cursor.execute(insert_q, (int(card_id), int(tag_id)))
+
+            insert_q = """
+                    INSERT INTO cards_in_boxes (card_id, box_id, comp_nr) VALUES (?, ?, ?);
+            """
+            for card_id, box_id, comp_nr in cards_in_boxes_info:
+                cursor.execute(insert_q, (int(card_id), int(box_id), int(comp_nr)))
+
+            connection.commit()
 
     @staticmethod
     def save_backup(database: str, directory: str):
@@ -141,31 +273,40 @@ class FlashcardDataBase:
             """
             cards_in_boxes_info = cursor.execute(cards_in_boxes_q).fetchall()
 
-        with open(new_filepath, "wb") as file:
+        with open(new_filepath, "w", encoding="utf-8") as file:
 
-            file.write(f"{len(cards_info)}\n".encode("utf-8"))
+            # first line header
+            file.write(datetime.fromtimestamp(int(time())).strftime("// %Y.%m.%d %H.%M\n"))
+
+            file.write(f"{len(cards_info)}\n")
+
             for card_id, last_update in cards_info:
-                file.write(f"{card_id}\t{last_update}\n".encode("utf-8"))
+                file.write(f"{card_id}\t{last_update}\n")
 
-            file.write(f"{len(boxes_info)}\n".encode("utf-8"))
+            file.write(f"{len(boxes_info)}\n")
+
             for box_id, name, color, nr_compartments, creation_date, last_update, special, cards_left in boxes_info:
-                file.write(f"{box_id}\t{color}\t{nr_compartments}\t{creation_date}\t{last_update}\t{special}\t{cards_left}\n{name}\n".encode("utf-8"))
+                file.write(f"{box_id}\t{color}\t{nr_compartments}\t{creation_date}\t{last_update}\t{special}\t{cards_left}\n{name.decode('utf-8')}\n")
 
-            file.write(f"{len(tags_info)}\n".encode("utf-8"))
+            file.write(f"{len(tags_info)}\n")
+
             for tag_id, name, color, last_update in tags_info:
-                file.write(f"{tag_id}\t{color}\t{last_update}\n{name}\n".encode("utf-8"))
+                file.write(f"{tag_id}\t{color}\t{last_update}\n{name.decode('utf-8')}\n")
 
-            file.write(f"{len(content_lines_info)}\n".encode("utf-8"))
+            file.write(f"{len(content_lines_info)}\n")
+
             for text, is_def, card_id in content_lines_info:
-                file.write(f"{card_id}\t{is_def}\n{text}\n".encode("utf-8"))
+                file.write(f"{card_id}\t{is_def}\n{text.decode('utf-8')}\n")
 
-            file.write(f"{len(cards_in_boxes_info)}\n".encode("utf-8"))
+            file.write(f"{len(cards_in_boxes_info)}\n")
+
             for card_id, box_id, comp_nr in cards_in_boxes_info:
-                file.write(f"{card_id}\t{box_id}\t{comp_nr}\n".encode("utf-8"))
+                file.write(f"{card_id}\t{box_id}\t{comp_nr}\n")
 
-            file.write(f"{len(cards_in_tags_info)}\n".encode("utf-8"))
+            file.write(f"{len(cards_in_tags_info)}\n")
+
             for card_id, tag_id in cards_in_tags_info:
-                file.write(f"{card_id}\t{tag_id}\n".encode("utf-8"))
+                file.write(f"{card_id}\t{tag_id}\n")
 
     @staticmethod
     def strip_box(database: str, box_id: int, flashcards: list):
@@ -377,17 +518,27 @@ class FlashcardDataBase:
         return tags
 
     @staticmethod
-    def retrieve_boxes(database: str) -> list:
+    def retrieve_boxes(database: str, **kwargs) -> list:
         if not os.path.isfile(database):
             FlashcardDataBase.create_database(database)
 
         with sqlite3.connect(database) as connection:
             cursor = connection.cursor()
 
-            get_boxes_q = """
-                SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date FROM boxes;
-            """
-            boxes_info = FlashcardDataBase.normalize_result(cursor.execute(get_boxes_q).fetchall())
+            box_id = kwargs.get("id", None)
+
+            if box_id is None:
+
+                get_boxes_q = """
+                    SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date FROM boxes;
+                """
+                boxes_info = FlashcardDataBase.normalize_result(cursor.execute(get_boxes_q).fetchall())
+            else:
+                get_boxes_q = """
+                    SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date FROM boxes
+                    WHERE id = ?;
+                """
+                boxes_info = FlashcardDataBase.normalize_result(cursor.execute(get_boxes_q, (box_id,)).fetchall())
 
             if not boxes_info:
                 return boxes_info
@@ -573,10 +724,10 @@ class FlashcardDataBase:
 
         color = "ffffff" if color is None else color
         if not is_viable_color(color):
-            return "ColorError"
+            raise ColorError
 
         if len(name) > 150 or len(name) == 0:
-            return "LengthError"
+            raise LengthError
 
         with sqlite3.connect(database) as connection:
             cursor = connection.cursor()
@@ -603,10 +754,10 @@ class FlashcardDataBase:
 
                 # information that insertion fell through because existing name has been passed
                 if same_name_count != 0:
-                    return "NameError"
+                    raise UniqueNameError
 
                 creation_date = int(time())
-
+                box.id = unique_id
                 last_update = creation_date
 
                 insert_box_q = """
@@ -642,10 +793,10 @@ class FlashcardDataBase:
         tag_id = tag.id
         color = tag.color
         if not is_viable_color(color):
-            return "ColorError"
+            raise ColorError
 
         if len(name) > 150 or len(name) == 0:
-            return "LengthError"
+            raise LengthError
 
         with sqlite3.connect(database) as connection:
             cursor = connection.cursor()
@@ -657,7 +808,7 @@ class FlashcardDataBase:
                 tagnames = FlashcardDataBase.normalize_result(cursor.execute(get_tagnames_q).fetchall())
 
                 if name in tagnames:
-                    return "NameError"
+                    raise UniqueNameError
 
                 tag_ids_q = """
                     SELECT id FROM tags;    
@@ -696,7 +847,7 @@ class FlashcardDataBase:
 
                 for line in flashcard.hidden_lines + flashcard.def_lines:
                     if len(line.encode(encoding="utf-8", errors="replace")) > 1000:
-                        return "LengthError"
+                        raise LengthError
 
                 if flashcard.id is None:
                     get_ids_q = """
@@ -811,7 +962,11 @@ class FlashcardDataBase:
                     rgb = [hex(randint(0, 255)).replace("0x", "") for i in range(3)]
                     rgb = "{}{}{}".format(rgb[0], rgb[1], rgb[2])
 
-                    FlashcardDataBase.insert_tag(database, Tag(None, tag, rgb))
+                    try:
+                        FlashcardDataBase.insert_tag(database, Tag(None, tag, rgb))
+
+                    except UniqueNameError:
+                        pass
 
         with sqlite3.connect(database) as connection:
             for flashcard in flashcards:

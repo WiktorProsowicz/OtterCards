@@ -32,7 +32,7 @@
         pos_hint: {"center_x": 0.5, "top": 1}
 
         BackButton:
-            size_hint: (None, 0.7)
+            size_hint: (None, 0.55)
             width: self.height
             pos_hint: {"x": 0, "center_y": 0.5}
             on_release: app.switch_screen("previous", "inverted")
@@ -49,7 +49,7 @@
 
         UtensilButton:
             id: languages_btn
-            size_hint: (None, 0.7)
+            size_hint: (None, 0.55)
             width: self.height
             pos_hint: {"center_x": 0.7, "center_y": 0.5}
             icon_src: app.directory + "/data/textures/languages_icon.png"

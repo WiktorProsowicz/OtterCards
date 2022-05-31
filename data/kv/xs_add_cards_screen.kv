@@ -37,7 +37,7 @@
 
             BackButton:
                 id: back_btn
-                size_hint: (None, 0.9)
+                size_hint: (None, 0.7)
                 width: self.height
                 pos_hint: {"x": 0, "center_y": 0.5}
                 on_release: app.switch_screen("cards_collection_screen", "right")
@@ -45,7 +45,7 @@
             Label:
                 id: title_label
                 size_hint: (None, None)
-                height: back_btn.height
+                height: back_btn.height * 1.2
                 width: header.right - back_btn.right - dp(10)
                 pos_hint: {"center_y": 0.5, "right": 1}
                 text: "add cards"

@@ -16,6 +16,7 @@ from requests.exceptions import ConnectionError
 from kivy.graphics import PushMatrix, PopMatrix, Rotate
 from kivy.core.image import Texture
 from kivy.uix.camera import Camera
+from ..classes.popups import ok_popup, loading_popup
 
 
 class AddFromOcrScreen(Screen):
@@ -48,15 +49,9 @@ class AddFromOcrScreen(Screen):
         # pil_img = pil_img.convert("L")
         pil_img.save(workdir + "/data/ocr_image.png")
 
-        wheel = Image(source=workdir + "/data/textures/loading_screen.png",
-                      allow_stretch=True, pos_hint={"center_x": 0.5, "center_y": 0.5})
-        loading_pop = Popup(title="scanning image...", auto_dismiss=False,
-                            size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 1),
-                            title_color=get_color_from_hex("#444444"),
-                            background=workdir + "/data/textures/popup_background.png",
-                            title_size=self.ids["header"].height / 2, height=self.width * 0.9 / 2,
-                            content=wheel, border=[0, 0, 0, 0])
+        loading_pop = loading_popup("scanning image...", self.width)
         loading_pop.open()
+
         Clock.schedule_once(lambda nt: self.convert_image(), .2)
         Clock.schedule_once(lambda nt: loading_pop.dismiss(), .2)
 
@@ -74,22 +69,9 @@ class AddFromOcrScreen(Screen):
                 App.get_running_app().switch_screen("card_chunks_screen", "inverted")
 
         except ConnectionError:
-            popup_text = "something went wrong... check your connection and try again!"
 
-            btn = Button(text="ok", color=get_color_from_hex("#444444"),
-                         font_size=self.width * 0.8 * 0.12 * 0.6,
-                         background_normal=workdir + "/data/textures/yes_button_normal.png",
-                         background_down=workdir + "/data/textures/yes_button_down.png", opacity=0.7)
-            warning_pop = Popup(title=popup_text,
-                                auto_dismiss=False,
-                                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                                title_color=get_color_from_hex("#444444"),
-                                background=workdir + "/data/textures/popup_background.png",
-                                title_size=self.width * 0.8 * 0.12 * 0.8, height=self.width * 0.9 / 1.5,
-                                content=btn, border=[0, 0, 0, 0])
-            btn.bind(on_release=warning_pop.dismiss)
-            btn.bind(on_release=lambda btn: App.get_running_app().switch_screen("previous", "inverted"))
-
+            warning_pop = ok_popup("something went wrong... check your connection and try again!", screen_width=self.width,
+                                   btn_callback=lambda btn: App.get_running_app().switch_screen("previous", "inverted"))
             Cache.append("card_chunks", "new_chunk", "")
             warning_pop.open()
 
@@ -221,7 +203,7 @@ class AddFromOcrScreen(Screen):
 
         if not self.languages_dropdown.container.children:
             for key in ocr_language_map().keys():
-                btn = LanguageButton(allow_no_selection=False)
+                btn = LanguageButton(allow_no_selection=False, group="languages")
                 if key == "English":
                     btn.state = "down"
                 btn.text = key

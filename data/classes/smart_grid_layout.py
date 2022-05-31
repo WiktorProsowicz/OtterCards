@@ -12,7 +12,7 @@ class SmartGridLayout(GridLayout):
         for index, child in enumerate(self.children, 0):
             if index % self.cols == 0:
                 container_height += child.height + self.spacing[1]
-        # container_height -= self.spacing[1]
+        container_height += self.padding[1] * 2
 
         self.height = container_height
 

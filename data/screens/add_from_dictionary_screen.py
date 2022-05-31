@@ -13,6 +13,7 @@ from kivy.metrics import dp
 from ..data_processing import get_cards_from_dictionary
 from data.flashcards.flashcard_database import FlashcardDataBase
 from kivy.app import App
+from ..classes.popups import ok_popup
 
 
 class AddFromDictionaryScreen(Screen):
@@ -40,7 +41,7 @@ class AddFromDictionaryScreen(Screen):
 
     def show_language_modes(self):
         # preparing tag popup
-        modes_container = SmartGridLayout(cols=2, size_hint=(1, None))
+        modes_container = SmartGridLayout(cols=2, size_hint=(1, None), spacing=dp(10))
         slider = ScrollView(size=(self.main_layout.width * 0.9, self.main_layout.height * 0.5),
                             do_scroll_x=False, effect_y=ScrollEffect(), bar_inactive_color=(0, 0, 0, 0),
                             pos_hint={"y": 0})
@@ -53,11 +54,19 @@ class AddFromDictionaryScreen(Screen):
                             size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
                             title_color=get_color_from_hex("#444444"),
                             background=workdir + "/data/textures/popup_background.png",
-                            title_size=self.title_label.font_size * 0.8, content=slider,
+                            title_size=self.title_label.font_size * 0.9, content=slider,
                             border=[0, 0, 0, 0])
         modes_popup.height += slider.height + dp(20)
 
-        modes = ["polish_to_german", "polish_to_english", "english_to_polish", "german_to_polish"]
+        modes = ["polish_to_german", "polish_to_english", "english_to_polish", "german_to_polish",
+                 "english_to_arabic", "arabic_to_english", "english_to_danish", "danish_to_english",
+                 "english_to_dutch", "dutch_to_english", "english_to_finnish", "finnish_to_english",
+                 "english_to_german", "german_to_english", "english_to_greek", "greek_to_english",
+                 "english_to_hindi", "hindi_to_english", "english_to_norwegian", "norwegian_to_english",
+                 "english_to_italian", "italian_to_english", "english_to_portuguese", "portuguese_to_english",
+                 "russian_to_english", "english_to_russian", "english_to_spanish", "spanish_to_english",
+                 "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english"]
+        modes.sort()
 
         for mode in modes:
             slider_mode = SliderLanguageMode(mode, size_hint=(0.4, None))
@@ -82,20 +91,9 @@ class AddFromDictionaryScreen(Screen):
         self.language_mode.draw()
 
     def submit(self):
-        workdir = Cache.get("app_info", "work_dir")
+
         if self.language_mode.language_mode is None:
-            btn = Button(text="ok", color=get_color_from_hex("#444444"),
-                         font_size=self.title_label.font_size * 0.6,
-                         background_normal=workdir + "/data/textures/yes_button_normal.png",
-                         background_down=workdir + "/data/textures/yes_button_down.png", opacity=0.7)
-            warning_pop = Popup(title="you have to choose languages before processing",
-                                auto_dismiss=True,
-                                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                                title_color=get_color_from_hex("#444444"),
-                                background=workdir + "/data/textures/popup_background.png",
-                                title_size=self.title_label.font_size * 0.7, height=self.width * 0.9 / 2.5,
-                                content=btn, border=[0, 0, 0, 0])
-            btn.bind(on_release=warning_pop.dismiss)
+            warning_pop = ok_popup("you have to choose languages before processing", self.width, 0.9 / 2.5)
 
             warning_pop.open()
 
@@ -111,18 +109,18 @@ class AddFromDictionaryScreen(Screen):
         get_hinted = True if self.get_hinted_button.state == "down" else False
         language_mode = self.language_mode.language_mode
 
-        retireved_cards, extras, exceptions = get_cards_from_dictionary(self.selected_file, language_mode,
+        retrieved_cards, extras, exceptions = get_cards_from_dictionary(self.selected_file, language_mode,
                                                                         subdefs_limit,
                                                                         cards_limit, get_hinted)
 
-        for card in retireved_cards:
+        for card in retrieved_cards:
             card.tags = tagnames.copy()
 
         # inserting cards into aux database
         aux_database_f = Cache.get("app_info", "aux_database_dir")
-        FlashcardDataBase.insert_cards(aux_database_f, retireved_cards)
+        FlashcardDataBase.insert_cards(aux_database_f, retrieved_cards)
 
-        Cache.append("dict_waiting_room", "card_ids", [card.id for card in retireved_cards])
+        Cache.append("dict_waiting_room", "card_ids", [card.id for card in retrieved_cards])
         Cache.append("dict_waiting_room", "extras", extras)
         Cache.append("dict_waiting_room", "exceptions", exceptions)
 

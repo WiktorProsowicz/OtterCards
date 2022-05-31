@@ -28,6 +28,7 @@ class SliderLanguageMode(Widget):
             lang1, lang2 = self.language_mode.split("_")[0], self.language_mode.split("_")[2]
             label_text = u"%s ↦ %s" % (lang1, lang2)
         else:
+            lang1, lang2 = None, None
             label_text = "no language mode"
 
         core_l = CoreLabel(text=label_text, font_size=self.font_size)
@@ -41,9 +42,13 @@ class SliderLanguageMode(Widget):
         self.canvas.clear()
         with self.canvas:
             Color(rgba=(1, 1, 1, 1))
-            Rectangle(size=(self.height * 1.5, self.height * 0.75),
-                      pos=(self.center_x - self.height * 0.75, self.y + self.height * 0.25),
-                      source=f"atlas://data/textures/atlas/language_modes/{self.language_mode}")
+            Rectangle(size=(self.height * 1.5 * 0.5, self.height * 0.75 * 0.5),
+                      pos=(self.x + self.width * 0.12 + self.width * 0.75 * (50/512), self.y + self.height * 0.25 + self.height * 0.75 * (1 - 216/256)),
+                      source=f"atlas://data/textures/atlas/language_modes/{lang1}")
+            Rectangle(size=(self.height * 1.5 * 0.5, self.height * 0.75 * 0.5),
+                      pos=(self.x + self.width * 0.12 + self.width * 0.75 * (235 / 512),
+                           self.y + self.height * 0.25 + self.height * 0.75 * (1 - 140 / 256)),
+                      source=f"atlas://data/textures/atlas/language_modes/{lang2}")
             Color(rgba=get_color_from_hex("#444444"))
             Rectangle(size=(core_l.texture.width, core_l.texture.height),
                       pos=(self.center_x - core_l.texture.width / 2, self.y),

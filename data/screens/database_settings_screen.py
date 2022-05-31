@@ -11,6 +11,7 @@ from kivy.properties import ObjectProperty
 from os.path import isdir
 from .add_from_file_screen import AddFromFileScreen
 from ..flashcards.flashcard_database import FlashcardDataBase
+from ..classes.popups import ok_popup, yes_no_popup
 
 
 class DatabaseSettingsScreen(Screen):
@@ -23,34 +24,56 @@ class DatabaseSettingsScreen(Screen):
         if self.selected_dir is None:
             return
 
+        database_f = Cache.get("app_info", "database_dir")
+
         try:
-            database_f = Cache.get("app_info", "database_dir")
             FlashcardDataBase.save_backup(database_f, self.selected_dir)
 
+            confirm_pop = ok_popup("successfully created a database backup file", screen_width=self.width, height_hint=0.4)
+            confirm_pop.open()
+
         except:
-            print("error")
+            warning_pop = ok_popup("something went wrong while saving the backup", screen_width=self.width)
+            warning_pop.open()
 
     def upload_backup(self):
         if self.selected_file is None:
             return
 
+        aux_database_f = Cache.get("app_info", "aux_database_dir")
+
         try:
-            print(FlashcardDataBase.upload_backup(self.selected_file))
+            FlashcardDataBase.upload_backup(aux_database_f, self.selected_file)
+            App.get_running_app().switch_screen("backup_content_screen", "left")
 
         except:
-            print("error")
+            warning_pop = ok_popup("something went wrong... maybe you provided invalid file?", screen_width=self.width)
+            warning_pop.open()
 
-    def select_dir(self, dirpath):
+    def warn_before_clearing(self):
+
+        info_pop = yes_no_popup("are you sure? changes cannot be reversed", self.width, 0.35,
+                                lambda obj: self.clear_database())
+        info_pop.open()
+
+    def clear_database(self):
+        database_f = Cache.get("app_info", "database_dir")
+        FlashcardDataBase.clear_database(database_f)
+
+    def select_dir(self, selection):
         # /// VALIDATION MAY BE NEEDED!
 
-        self.selected_dir = dirpath
-        self.dirname_label.text = dirpath
+        if not selection:
+            return
+
+        self.selected_dir = selection[0]
+        self.dirname_label.text = selection[0]
 
     def filter_file(self, folder, file):
         return isdir(file)
 
-    def select_file(self, filepath):
-        AddFromFileScreen.select_file(self, filepath)
+    def select_file(self, selection):
+        AddFromFileScreen.select_file(self, selection)
 
     def show_files(self):
         AddFromFileScreen.show_files(self)
@@ -80,7 +103,7 @@ class DatabaseSettingsScreen(Screen):
 
         btn.height = btn.font_size * 2.5
 
-        btn.bind(on_release=lambda btn: self.select_dir(filechooser.selection[0]))
+        btn.bind(on_release=lambda btn: self.select_dir(filechooser.selection))
         btn.bind(on_release=filechooser_popup.dismiss)
 
         filechooser_popup.open()

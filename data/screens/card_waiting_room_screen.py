@@ -5,14 +5,8 @@ from ..classes.slider_card import SliderCard
 from ..classes.utensils import UtensilDropUp, UtensilButton
 from kivy.metrics import dp
 from kivy.app import App
-from data.flashcards.flashcard_database import FlashcardDataBase
-from ..classes.slider_tag import SliderTag
-from kivy.uix.scrollview import ScrollView
-from kivy.effects.scroll import ScrollEffect
-from kivy.utils import get_color_from_hex
-from kivy.uix.popup import Popup
-from ..classes.smart_grid_layout import SmartGridLayout
-from kivy.uix.button import Button
+from data.flashcards.flashcard_database import FlashcardDataBase, LengthError
+from ..classes.popups import tags_popup, ok_popup
 
 
 class CardWaitingRoomScreen(Screen):
@@ -28,7 +22,7 @@ class CardWaitingRoomScreen(Screen):
     approve_btn = ObjectProperty(None)
 
     def proceed(self):
-        aux_database_f = Cache.get("app_info", "aux_database_dir")
+
         database_f = Cache.get("app_info", "database_dir")
 
         flashcard_list = [card.flashcard for card in self.slider_cards]
@@ -37,15 +31,23 @@ class CardWaitingRoomScreen(Screen):
             flashcard.id = None
 
         # get_from_file and get_from_dict tools make line length validation so new one is not necessary
-        FlashcardDataBase.insert_cards(database_f, flashcard_list)
-        FlashcardDataBase.delete_cards(aux_database_f, flashcard_list)
+        try:
+            FlashcardDataBase.insert_cards(database_f, flashcard_list)
 
-        App.get_running_app().switch_screen("add_cards_screen", "right")
+        except LengthError:
+            warning_pop = ok_popup("some of the lines in cards are too long!", self.width, 0.3)
+            warning_pop.open()
+
+        else:
+            aux_database_f = Cache.get("app_info", "aux_database_dir")
+            FlashcardDataBase.clear_database(aux_database_f)
+            App.get_running_app().switch_screen("add_cards_screen", "right")
 
     def discard(self):
 
         aux_database_f = Cache.get("app_info", "aux_database_dir")
-        FlashcardDataBase.delete_cards(aux_database_f, [card.flashcard for card in self.slider_cards])
+        FlashcardDataBase.clear_database(aux_database_f)
+        # FlashcardDataBase.delete_cards(aux_database_f, [card.flashcard for card in self.slider_cards])
 
         App.get_running_app().switch_screen("add_cards_screen", "right")
 
@@ -57,14 +59,11 @@ class CardWaitingRoomScreen(Screen):
             if card.marked and slider_tag.tag.name not in card.flashcard.tags:
                 card.flashcard.tags.append(slider_tag.tag.name)
                 card.refresh_info()
-                to_insert.append(card.flashcard)
+                to_insert.append(card)
 
-            if not card.shortened:
-                card.toggle_short_long()
+        FlashcardDataBase.insert_cards(aux_database_f, [card.flashcard for card in to_insert])
 
-        FlashcardDataBase.insert_cards(aux_database_f, to_insert)
-
-        for card in self.slider_cards:
+        for card in to_insert:
             card.toggle_short_long()
 
         self.card_utensils.toggle(None, mode="close")
@@ -72,41 +71,11 @@ class CardWaitingRoomScreen(Screen):
 
     def show_tags(self, *args):
 
-        # preparing tag popup
-        tag_container = SmartGridLayout(cols=1, spacing=dp(10), size_hint=(1, None))
-        slider = ScrollView(size=(self.main_layout.width * 0.9, self.main_layout.height * 0.5),
-                            do_scroll_x=False, effect_y=ScrollEffect(), bar_inactive_color=(0, 0, 0, 0))
-
         database_dir = Cache.get("app_info", "database_dir")
-        workdir = Cache.get("app_info", "work_dir")
 
-        slider.add_widget(tag_container)
-
-        tags_popup = Popup(title="choose tag to label cards", auto_dismiss=True,
-                           size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
-                           title_color=get_color_from_hex("#444444"),
-                           background=workdir + "/data/textures/popup_background.png",
-                           title_size=self.title_label.font_size * 0.8, content=slider,
-                           border=[0, 0, 0, 0])
-        tags_popup.height += slider.height
-
-        retrieved_tags = FlashcardDataBase.retrieve_tags(database_dir)
-        for index, tag in enumerate(retrieved_tags, 1):
-            slider_tag = SliderTag(tag, index)
-            slider_tag.bind(size=lambda obj, pos: obj.draw(), pos=lambda obj, pos: obj.adjust_style())
-            slider_tag.bind(pos=lambda obj, pos: tag_container.resize_v(),
-                            on_choose=lambda obj: self.label_cards(obj))
-            slider_tag.bind(on_choose=lambda obj: tags_popup.dismiss())
-            tag_container.add_widget(slider_tag)
-
-        tag_container.resize_v()
-
-        if tag_container.height > slider.height:
-            slider.do_scroll_y = True
-        else:
-            slider.do_scroll_y = False
-
-        tags_popup.open()
+        tags_pop = tags_popup("choose tag to label cards", self.size, database_dir, lambda obj: self.label_cards(obj),
+                              "there are no tags to choose from", )
+        tags_pop.open()
 
     """
     Method takes all marked cards and combines them into one by assigning all lines and unique tags into the first in order.

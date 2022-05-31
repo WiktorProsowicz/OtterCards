@@ -5,9 +5,12 @@ from data.flashcards.flashcard_database import Tag
 from kivy.metrics import dp
 from kivy.uix.widget import Widget
 from ..classes.utils import contrasting_color
+from kivy.properties import BooleanProperty
 
 
 class SliderTag(Widget):
+
+    marked = BooleanProperty(False)
 
     def toggle_delete(self, *args):
         self.to_delete = not self.to_delete
@@ -15,7 +18,7 @@ class SliderTag(Widget):
         if self.to_delete:
             self.opacity = 1
             self.draw()
-            with self.canvas.before:
+            with self.canvas:
                 Color(rgba=get_color_from_hex("#ab0202"))
                 Line(points=[(self.x, self.center_y), (self.right, self.center_y)], width=2)
 
@@ -23,19 +26,30 @@ class SliderTag(Widget):
             self.opacity = 0.5
             self.draw()
 
+    def toggle_marked(self, *args):
+        self.marked = not self.marked
+
+        if self.marked:
+            r = self.parent.width / 17
+            with self.canvas.after:
+                Color(rgba=get_color_from_hex("#b86a30"))
+                Line(rounded_rectangle=(self.x, self.y, self.width, self.height, r), width=3)
+
+        else:
+            self.canvas.after.clear()
+
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
             self.opacity -= 0.2
             touch.grab(self)
-            self.draw()
-            return True
+            return super(SliderTag, self).on_touch_down(touch)
 
     def on_touch_up(self, touch):
         if touch.grab_current is self:
             self.opacity += 0.2
             self.dispatch("on_choose")
             touch.ungrab(self)
-            return True
+            return super(SliderTag, self).on_touch_up(touch)
 
     def on_choose(self):
         pass
@@ -43,16 +57,16 @@ class SliderTag(Widget):
     def draw(self, *args):
         r = self.parent.width / 13
 
-        self.canvas.before.clear()
-        with self.canvas.before:
+        self.canvas.clear()
+        with self.canvas:
             Color(rgba=get_color_from_hex("#" + self.tag.color))
-            RoundedRectangle(size=self.size, pos=self.pos, radius=[(r, r), (r, r), (r, r), (r, r)])
+            RoundedRectangle(size=self.size, pos=self.pos, radius=(r,))
             Color(rgba=self.color)
             Rectangle(pos=(self.center_x - self.core_l.texture.width / 2, self.center_y - self.core_l.texture.height / 2),
                       size=(self.core_l.texture.width, self.core_l.texture.height), texture=self.core_l.texture)
 
         if self.index == 0:
-            with self.canvas.before:
+            with self.canvas:
                 Line(points=[(self.parent.x, self.y - dp(5)), (self.parent.right, self.y - dp(5))])
 
     def adjust_style(self, *args):

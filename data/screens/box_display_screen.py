@@ -136,25 +136,28 @@ class BoxDisplayScreen(Screen):
 
         database_f = Cache.get("app_info", "database_dir")
         FlashcardDataBase.strip_box(database_f, self.base_box_widget.box.id, marked)
+        self.base_box_widget.box.nr_cards -= len(marked)
 
         to_remove = []
         for compartment in self.l_slider_cards:
             to_remove += [card for card in compartment if card.flashcard in marked]
 
-        for index, compartment in enumerate(self.l_slider_cards):
-            for card in to_remove:
-                if card in compartment:
-                    self.l_slider_cards[index].remove(card)
+        for card in to_remove:
+            self.l_slider_cards[card.flashcard.comp_nr - 1].remove(card)
 
         self.refresh_left()
         self.left_utensils.toggle(None, mode="close")
         self.tags_dropdown.select(self.tags_container.children[0].tag)
+
+        self.update_labels()
+        self.base_box_widget.refresh()
 
     def push_cards(self, *args):
         marked = [card.flashcard for card in self.r_slider_cards if card.marked]
 
         database_f = Cache.get("app_info", "database_dir")
         FlashcardDataBase.update_compartment(database_f, self.base_box_widget.box.id, marked, None)
+        self.base_box_widget.box.nr_cards += len(marked)
 
         for flashcard in marked:
             flashcard.comp_nr = 1
@@ -165,6 +168,8 @@ class BoxDisplayScreen(Screen):
         self.right_utensils.toggle(None, mode="close")
         self.tags_dropdown.select(self.tags_container.children[0].tag)
 
+        self.update_labels()
+        self.base_box_widget.refresh()
         self.pages.page = 0
 
     def hide_utensils(self, dropdown, page):

@@ -1,0 +1,75 @@
+#:import c kivy.utils.get_color_from_hex
+
+
+<RevisingScreen>:
+
+    main_layout: main_layout
+    back_btn: back_btn
+
+    canvas.before:
+
+        Color:
+            rgba: (1, 1, 1, 1)
+
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    FloatLayout:
+        id: main_layout
+
+        canvas.before:
+            Color:
+                rgba: c("#3dd1c0")
+
+            Mesh:
+                mode: "triangle_fan"
+                vertices: [self.width * 0.2, self.width * 0.62, 0, 0, self.width * 0.1, self.width * 0.72, 0, 0, self.width * 0.8, self.width * 0.72, 0, 0, self.width * 0.9, self.width * 0.62, 0, 0, ]
+                indices: [0, 1, 2, 3]
+
+        canvas.after:
+
+            Color:
+                rgba: c("#7baba6")
+
+            Rectangle:
+                pos: self.pos
+                size: (self.width, self.width * 0.25)
+
+            Color:
+                rgba: c("#32a89b")
+
+            Rectangle:
+                size: (self.width * 0.7, self.width * 0.6)
+                pos: (self.width * 0.2, self.width * 0.02)
+
+            Color:
+                rgba: c("#37bdae")
+
+            Mesh:
+                mode: "triangle_fan"
+                vertices: [self.width * 0.2, self.width * 0.02, 0, 0, self.width * 0.2, self.width * 0.62, 0, 0, self.width * 0.1, self.width * 0.72, 0, 0, self.width * 0.1, self.width * 0.12, 0, 0]
+                indices: [0, 1, 2, 3]
+
+            Color:
+                rgba: c("#278f83")
+
+            Mesh:
+                mode: "triangle_fan"
+                vertices: [self.width * 0.2, self.width * 0.62, 0, 0, self.width * 0.25, self.width * 0.42, 0, 0, self.width * 0.95, self.width * 0.42, 0, 0, self.width * 0.9, self.width * 0.62, 0, 0, ]
+                indices: [0, 1, 2, 3]
+
+            Color:
+                rgba: c("#2da193")
+
+            Mesh:
+                mode: "triangle_fan"
+                vertices: [self.width * 0.2, self.width * 0.62, 0, 0, self.width * 0.12, self.width * 0.47, 0, 0, self.width * 0.02, self.width * 0.57, 0, 0, self.width * 0.1, self.width * 0.72, 0, 0, ]
+                indices: [0, 1, 2, 3]
+
+        BackButton:
+            id: back_btn
+            size_hint: (0.12, None)
+            pos_hint: {"x": 0.02}
+            y: root.height - self.height - root.width * 0.02
+            on_release: root.go_back()

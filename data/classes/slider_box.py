@@ -5,9 +5,11 @@ from kivy.cache import Cache
 from kivy.metrics import dp
 from kivy.graphics import Color, RoundedRectangle, Rectangle, Line
 from kivy.utils import get_color_from_hex
+from kivy.properties import BooleanProperty
 
 
 class SliderBox(Widget):
+    marked = BooleanProperty(False)
 
     def toggle_delete(self, *args):
         self.to_delete = not self.to_delete
@@ -19,6 +21,18 @@ class SliderBox(Widget):
                 RoundedRectangle(pos=self.pos, size=self.size)
         else:
             self.opacity = 0.5
+            self.canvas.before.clear()
+
+    def toggle_marked(self, *args):
+        self.marked = not self.marked
+
+        if self.marked:
+            self.opacity = 1.0
+            with self.canvas.before:
+                Color(rgb=get_color_from_hex("#d48f5b"), a=.7)
+                RoundedRectangle(pos=self.pos, size=self.size)
+
+        else:
             self.canvas.before.clear()
 
     def adjust_style(self, *args):
@@ -50,22 +64,23 @@ class SliderBox(Widget):
             self.core_l.refresh()
 
     def draw(self, *args):
-
         self.canvas.clear()
         with self.canvas:
             # Color(rgba=get_color_from_hex("#666666"))
             # Rectangle(size=self.size, pos=self.pos)
 
             Color(rgba=(1, 1, 1, 1))
-            Rectangle(size=(self.width * 0.9, self.width * 0.9), pos=(self.x + self.width * 0.05, self.y + self.width * 0.55),
+            Rectangle(size=(self.width * 0.9, self.width * 0.9),
+                      pos=(self.x + self.width * 0.05, self.y + self.width * 0.55),
                       source=self.img_src)
 
             Color(rgb=get_color_from_hex("#" + self.box.color), a=.8)
             RoundedRectangle(size=(self.width * 0.65, self.width * 0.5),
-                      pos=(self.x + self.width * 0.1, self.y + self.width * 0.595))
+                             pos=(self.x + self.width * 0.1, self.y + self.width * 0.595))
 
             Color(rgba=get_color_from_hex("#444444"))
-            Rectangle(size=(self.width * 0.5, self.width * 0.5), pos=(self.x + self.width * 0.2, self.y + self.height / 2.5),
+            Rectangle(size=(self.width * 0.5, self.width * 0.5),
+                      pos=(self.x + self.width * 0.2, self.y + self.height / 2.5),
                       source=Cache.get("app_info", "work_dir") + "/data/textures/otter_silhouette.png")
 
             Color(rgba=get_color_from_hex("#04c29c"))
@@ -78,8 +93,18 @@ class SliderBox(Widget):
 
             Color(rgba=get_color_from_hex("#444444"))
             Rectangle(size=(self.core_l.texture.width, self.core_l.texture.height),
-                      pos=(self.x + self.width / 2 - self.core_l.texture.width / 2, self.y + self.height / 6 - self.core_l.texture.height / 2),
+                      pos=(self.x + self.width / 2 - self.core_l.texture.width / 2,
+                           self.y + self.height / 6 - self.core_l.texture.height / 2),
                       texture=self.core_l.texture)
+
+            if self.box.is_redundant:
+                dev_label = CoreLabel(text="R", font_size=self.width / 7)
+                dev_label.refresh()
+
+                Color(rgba=get_color_from_hex("#8f3b1f"))
+                Rectangle(size=(dev_label.texture.width, dev_label.texture.height),
+                          pos=(self.right - dev_label.texture.height - dp(5),
+                               self.y + self.height / 3 + dp(5)), texture=dev_label.texture)
 
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
@@ -102,7 +127,7 @@ class SliderBox(Widget):
 
         self.size_hint = (0.45, None)
 
-        self.box = box      # Box object to carry info
+        self.box = box  # Box object to carry info
 
         self.core_l = CoreLabel(text="")
         self.core_l.refresh()

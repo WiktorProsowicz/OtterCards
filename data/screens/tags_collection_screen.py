@@ -145,7 +145,7 @@ class TagsCollectionScreen(Screen):
             self.main_layout.remove_widget(self.so_empty_lbl)
 
         # the user can scroll only when there is some content out of his sight
-        self.slider.do_scroll_y = False if self.slider_container.height < self.slider.height else True
+        # self.slider.do_scroll_y = False if self.slider_container.height < self.slider.height else True
 
         if self.utensils is not None:
             self.update_buttons()

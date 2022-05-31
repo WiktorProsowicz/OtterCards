@@ -1,6 +1,7 @@
 from os.path import isfile
 from data.flashcards.flashcard_database import Flashcard
-from .extracting_from_dictionaries import get_entries_from_diki
+from .extracting_from_dictionaries import get_entries_from_diki, get_to_english_from_babla
+from .flashcards.flashcards_exceptions import DictionaryError
 
 
 def get_cards_from_file(filename: str, hidden_pattern: str, def_pattern: str) -> list:
@@ -19,7 +20,7 @@ def get_cards_from_file(filename: str, hidden_pattern: str, def_pattern: str) ->
         return None
 
     flashcards = []
-    mode = ""    # indicated current position of parser, tells what kind of lines is being read
+    mode = ""  # indicated current position of parser, tells what kind of lines is being read
     current_card = Flashcard(id=None, hidden_lines=[], def_lines=[], tags=[])
 
     with open(filename, encoding="utf-8") as file:
@@ -29,7 +30,7 @@ def get_cards_from_file(filename: str, hidden_pattern: str, def_pattern: str) ->
                 if mode == "def":
                     flashcards.append(current_card)
                     mode = "hidden"
-                    current_card = Flashcard(id=None, hidden_lines=[], def_lines=[], tags=[])   # making a new flashcard
+                    current_card = Flashcard(id=None, hidden_lines=[], def_lines=[], tags=[])  # making a new flashcard
                     pure_text = line[len(hidden_pattern):].rstrip("\n")
 
                     pure_text = pure_text.encode(encoding="utf-8", errors="replace")
@@ -55,7 +56,7 @@ def get_cards_from_file(filename: str, hidden_pattern: str, def_pattern: str) ->
 
                 current_card.def_lines.append(pure_text)
 
-        flashcards.append(current_card)     # last card
+        flashcards.append(current_card)  # last card
 
     return flashcards
 
@@ -64,16 +65,17 @@ def get_cards_from_dictionary(filename: str, mode: str, subdefs_limit: int = Non
                               flashcards_limit: int = None, get_hinted: bool = True, **kwargs) -> tuple:
     """
     function to extract prepared words from file and search for them in dictionary with function get_entries_from_[dictionary_name]
-    mode indicates the dictionary_name and language e.g. polish_to_english --- polish words, diki dictionary
+    @:param mode indicates the dictionary_name and language e.g. polish_to_english --- polish words, diki dictionary
     this function is prepared for data in format:
         [ hidden: tuple, def: tuple, hidden: tuple ... ], extras: tuple
-    subdefs_limit - tells how many lines from below the label we can get
-    flashcards_limit - tells how many different "words" we can get
-    get_hinted - get additional words (only names) if possible
+    @:param subdefs_limit - tells how many lines from below the label we can get
+    @:param flashcards_limit - tells how many different "words" we can get
+    @:param get_hinted - get additional words (only names) if possible
     """
+
     if filename != "":
         if not isfile(filename):
-            return None, None, None
+            raise FileNotFoundError
 
         with open(filename) as f:
             words = [line.strip("\n \t") for line in f.readlines()]
@@ -83,16 +85,29 @@ def get_cards_from_dictionary(filename: str, mode: str, subdefs_limit: int = Non
     flashcards, extra_lines, exceptions = [], [], []
 
     for word in words:
-        if mode == "english_to_polish" or mode == "polish_to_english":
-            entires, extras = get_entries_from_diki(word, "english", subdefs_limit, flashcards_limit, get_hinted)
 
-        elif mode == "german_to_polish" or mode == "polish_to_german":
-            entires, extras = get_entries_from_diki(word, "german", subdefs_limit, flashcards_limit, get_hinted)
+        try:
+            if mode == "english_to_polish" or mode == "polish_to_english":
+                entires, extras = get_entries_from_diki(word, "english", subdefs_limit, flashcards_limit, get_hinted)
+
+            elif mode == "german_to_polish" or mode == "polish_to_german":
+                entires, extras = get_entries_from_diki(word, "german", subdefs_limit, flashcards_limit, get_hinted)
+
+            elif mode in ["english_to_arabic", "arabic_to_english", "english_to_danish", "danish_to_english",
+                          "english_to_dutch", "dutch_to_english", "english_to_finnish", "finnish_to_english",
+                          "english_to_german", "german_to_english", "english_to_greek", "greek_to_english",
+                          "english_to_hindi", "hindi_to_english", "english_to_norwegian", "norwegian_to_english",
+                          "english_to_italian", "italian_to_english", "english_to_portuguese", "portuguese_to_english",
+                          "russian_to_english", "english_to_russian", "english_to_spanish", "spanish_to_english",
+                          "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english"]:
+
+                l = [l for l in mode.split("_to_") if l != "english"][0]
+                entires, extras = get_to_english_from_babla(word, l, subdefs_limit, flashcards_limit, get_hinted)
+
+        except DictionaryError:
+            exceptions.append(word)
 
         else:
-            return None, None, None
-
-        if entires is not None:
             while entires:
                 hidden_lines = entires.pop(0)
                 def_lines = entires.pop(0)
@@ -100,8 +115,5 @@ def get_cards_from_dictionary(filename: str, mode: str, subdefs_limit: int = Non
 
             for extra in extras:
                 extra_lines.append(extra)
-
-        else:
-            exceptions.append(word)
 
     return flashcards, extra_lines, exceptions

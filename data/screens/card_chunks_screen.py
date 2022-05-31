@@ -4,9 +4,10 @@ from kivy.app import App
 from ..classes.slider_chunk import SliderChunk
 from kivy.properties import ObjectProperty
 from ..classes.dismissable_bubble import DismissableBubble, DismissableBubbleButton
-from data.flashcards.flashcard_database import FlashcardDataBase, Flashcard
+from data.flashcards.flashcard_database import FlashcardDataBase, Flashcard, LengthError
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
+from ..classes.popups import ok_popup
 
 
 class CardChunksScreen(Screen):
@@ -16,7 +17,7 @@ class CardChunksScreen(Screen):
 
     def discard(self):
         self.slider_chunks.clear()
-        App.get_running_app().switch_screen("add_Cards_screen", "right")
+        App.get_running_app().switch_screen("add_cards_screen", "right")
 
     def save(self):
         def_lines, hidden_lines = [], []
@@ -27,9 +28,16 @@ class CardChunksScreen(Screen):
                 def_lines.append(chunk.text)
 
         database_f = Cache.get("app_info", "database_dir")
-        FlashcardDataBase.insert_cards(database_f, [Flashcard(id=None, hidden_lines=hidden_lines, def_lines=def_lines)])
-        self.slider_chunks.clear()
-        App.get_running_app().switch_screen("add_cards_screen", "right")
+        try:
+            FlashcardDataBase.insert_cards(database_f, [Flashcard(id=None, hidden_lines=hidden_lines, def_lines=def_lines)])
+
+        except LengthError:
+            warning_pop = ok_popup("some of the lines have invalid length!", self.width)
+            warning_pop.open()
+
+        else:
+            self.slider_chunks.clear()
+            App.get_running_app().switch_screen("add_cards_screen", "right")
 
     def add_chunk(self):
         App.get_running_app().switch_screen("add_from_ocr_screen", "inverted")

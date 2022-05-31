@@ -139,6 +139,9 @@ class BoxesCollectionScreen(Screen):
             slider_box.bind(on_choose=self.choose_box)
             self.slider_container.add_widget(slider_box)
 
+        if len(self.slider_boxes) == 1:
+            self.slider_container.add_widget(Label(opacity=0, size_hint=(0.45, None)))
+
         self.slider_container.resize_v()
 
         self.slider_container.bind(height=self.enable_disable_scroll)
@@ -155,13 +158,13 @@ class BoxesCollectionScreen(Screen):
         # adding encouraging label in case there are no tags
         if not self.slider_boxes:
 
-            if self.slider_cards and self.so_empty_lbl in self.main_layout.children:
+            if self.slider_boxes and self.so_empty_lbl in self.main_layout.children:
                 self.main_layout.remove_widget(self.so_empty_lbl)
 
             text = "so empty...\nconsider adding some boxes!"
 
             self.so_empty_lbl = Label(text=text, size_hint=(1, None),
-                                      pos_hint={"center_y": 0.7, "center_x": 0.5},
+                                      pos_hint={"center_y": 0.6, "center_x": 0.5},
                                       color=get_color_from_hex("#AAAAAA"), font_size=self.slider_container.width * 0.07)
 
             self.main_layout.add_widget(self.so_empty_lbl)

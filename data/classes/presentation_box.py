@@ -36,6 +36,9 @@ class PresentationBox(Widget):
 
     def refresh(self):
 
+        if self.box is None:
+            return
+
         font_size = self.width / 8
         self.core_l = CoreLabel(text=self.box.name, font_size=font_size,
                                 text_size=(self.width - self.std_spacing * 4, None), halign="center")

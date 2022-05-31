@@ -8,11 +8,8 @@ from kivy.metrics import dp
 from kivy.utils import get_color_from_hex
 from kivy.uix.label import Label
 from kivy.app import App
-from kivy.uix.popup import Popup
-from ..classes.smart_grid_layout import SmartGridLayout
-from kivy.uix.scrollview import ScrollView
-from kivy.effects.scroll import ScrollEffect
-from ..classes.slider_tag import SliderTag
+from ..classes.clickable_label import ClickableLabel
+from ..classes.popups import display_card as display_s_card, tags_popup
 from kivy.clock import Clock
 
 
@@ -55,42 +52,10 @@ class CardsCollectionScreen(Screen):
         if not self.to_label:
             return False
 
-        # preparing tag popup
-        tag_container = SmartGridLayout(cols=1, spacing=dp(10), size_hint=(1, None), padding=[0, dp(10)])
-        slider = ScrollView(size=(self.main_layout.width * 0.9, self.main_layout.height * 0.5),
-                            do_scroll_x=False, effect_y=ScrollEffect(), bar_inactive_color=(0, 0, 0, 0),
-                            bar_color=(0, 0, 0, 0))
-
         database_dir = Cache.get("app_info", "database_dir")
-        workdir = Cache.get("app_info", "work_dir")
+        tags_pop = tags_popup("choose tag to label cards", self.size, database_dir, lambda tag: self.label_cards(tag))
 
-        slider.add_widget(tag_container)
-
-        self.tags_popup = Popup(title="choose tag to label cards", auto_dismiss=True,
-                                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 1),
-                                title_color=get_color_from_hex("#444444"),
-                                background=workdir + "/data/textures/popup_background.png",
-                                title_size=self.title_label.font_size * 0.8, content=slider,
-                                border=[0, 0, 0, 0])
-        self.tags_popup.height += slider.height
-
-        retrieved_tags = FlashcardDataBase.retrieve_tags(database_dir)
-        for index, tag in enumerate(retrieved_tags, 1):
-            slider_tag = SliderTag(tag, index)
-            slider_tag.bind(size=lambda obj, pos: obj.draw(), pos=lambda obj, pos: obj.adjust_style())
-            slider_tag.bind(pos=lambda obj, pos: tag_container.resize_v(),
-                            on_choose=lambda obj: self.label_cards(obj))
-            slider_tag.bind(on_choose=lambda obj: self.tags_popup.dismiss())
-            tag_container.add_widget(slider_tag)
-
-        tag_container.resize_v()
-
-        if tag_container.height > slider.height:
-            slider.do_scroll_y = True
-        else:
-            slider.do_scroll_y = False
-
-        self.tags_popup.open()
+        tags_pop.open()
 
     def toggle_label_mode(self, label_btn):
 
@@ -123,20 +88,22 @@ class CardsCollectionScreen(Screen):
 
         for card in self.slider_cards:
 
-            if not card.shortened:
-                card.toggle_short_long(None)
+            # if not card.shortened:
+            #     card.toggle_short_long(None)
 
             card.to_label = True
             card.toggle_label(None)  # this will show card in not-to-label mode
 
             if self.label_mode:
-                card.unbind(on_choose=card.toggle_short_long)
+                # card.unbind(on_choose=card.toggle_short_long)
+                card.unbind(on_choose=self.display_card)
                 card.bind(on_choose=card.toggle_label)
 
             else:
                 card.opacity = 1
 
-                card.bind(on_choose=card.toggle_short_long)
+                # card.bind(on_choose=card.toggle_short_long)
+                card.bind(on_choose=self.display_card)
                 card.unbind(on_choose=card.toggle_label)
 
     def toggle_edit_mode(self, edit_btn):
@@ -166,13 +133,15 @@ class CardsCollectionScreen(Screen):
                 self.utensils.toggle(self.more_btn)
 
         for card in self.slider_cards:
-            if not card.shortened:
-                card.toggle_short_long(None)
+            # if not card.shortened:
+            #     card.toggle_short_long(None)
 
             if self.edit_mode:
                 card.bind(on_choose=self.send_to_workshop)
+                card.unbind(on_choose=self.display_card)
             else:
                 card.unbind(on_choose=self.send_to_workshop)
+                card.bind(on_choose=self.display_card)
 
     def delete_cards(self, title_lbl):
         database_f = Cache.get("app_info", "database_dir")
@@ -229,8 +198,8 @@ class CardsCollectionScreen(Screen):
                 self.utensils.toggle(self.more_btn)
 
         for card in self.slider_cards:
-            if not card.shortened:
-                card.toggle_short_long(None)
+            # if not card.shortened:
+            #     card.toggle_short_long(None)
 
             # preparing all cards style
             card.to_delete = True
@@ -238,14 +207,16 @@ class CardsCollectionScreen(Screen):
 
             if self.delete_mode:
                 card.bind(on_choose=card.toggle_delete)
-                card.unbind(on_choose=card.toggle_short_long)
+                # card.unbind(on_choose=card.toggle_short_long)
+                card.unbind(on_choose=self.display_card)
 
             else:
                 # restoring card info and style
                 card.opacity = 1
 
                 card.unbind(on_choose=card.toggle_delete)
-                card.bind(on_choose=card.toggle_short_long)
+                # card.bind(on_choose=card.toggle_short_long)
+                card.bind(on_choose=self.display_card)
 
     def on_leave(self, *args):
         self.slider_container.clear_widgets()
@@ -303,40 +274,46 @@ class CardsCollectionScreen(Screen):
         database_f = Cache.get("app_info", "database_dir")
 
         if main_filter == "all":
-            retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "all", limit=20)
+            retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "all", limit=50)
             self.title_label.text = "all cards"
         else:
-            retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "tag", tag=main_filter, limit=20)
+            retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "tag", tag=main_filter, limit=50)
             self.title_label.text = main_filter
 
-        retrieved_cards.sort(key=lambda card: (card.last_update, card.id), reverse=True)
+        retrieved_cards.sort(key=lambda flashcard: (flashcard.last_update, flashcard.id), reverse=True)
+        self.loaded_entire_collection = True if len(retrieved_cards) < 50 else False
 
         for card in retrieved_cards:
             self.slider_cards.append(SliderCard(card))
 
-        self.refresh()
+        Clock.schedule_once(lambda nt: self.refresh(), 0.07)
         self.slider.scroll_y = 1
 
     # for async loading card widgets
-    def load_cards(self, scroll_y: float):
-        #print(scroll_y)
-        if scroll_y == 0:
-            not_ids = [s_card.flashcard.id for s_card in self.slider_cards]
-            database_f = Cache.get("app_info", "database_dir")
-            main_filter = Cache.get("cards_collection", "main_filter")
+    def load_cards(self, *args):
 
-            if main_filter == "all":
-                retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "all", limit=20, not_ids=not_ids)
-            else:
-                retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "tag", tag=main_filter, limit=20, not_ids=not_ids)
+        not_ids = [s_card.flashcard.id for s_card in self.slider_cards]
+        database_f = Cache.get("app_info", "database_dir")
+        main_filter = Cache.get("cards_collection", "main_filter")
 
-            previous_len = len(self.slider_cards)
-            for card in retrieved_cards:
-                s_card = SliderCard(card)
-                self.slider_cards.append(s_card)
+        if main_filter == "all":
+            retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "all", limit=50, not_ids=not_ids)
+        else:
+            retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "tag", tag=main_filter, limit=50, not_ids=not_ids)
 
-            self.refresh()
-            self.slider.scroll_y = 1 - (previous_len / (previous_len + len(retrieved_cards)))
+        previous_len = len(self.slider_cards)
+        if previous_len == 0:
+            self.loaded_entire_collection = True
+
+        for card in retrieved_cards:
+            s_card = SliderCard(card)
+            self.slider_cards.append(s_card)
+
+        self.refresh()
+        self.slider.scroll_y = 1 - (previous_len / (previous_len + len(retrieved_cards)))
+
+    def display_card(self, slider_card):
+        display_s_card(slider_card, self.size)
 
     # method used to load all possessed cards to the slider container
     def refresh(self):
@@ -344,14 +321,24 @@ class CardsCollectionScreen(Screen):
         for card in self.slider_cards:
             self.slider_container.add_widget(card)
             card.bind(pos=card.draw, width=card.adjust_style)
-            card.bind(size=self.slider_container.resize_v, on_choose=card.toggle_short_long)
+            # card.bind(size=self.slider_container.resize_v, on_choose=card.toggle_short_long)
+            card.bind(size=self.slider_container.resize_v, on_choose=self.display_card)
+
+        if not self.loaded_entire_collection:
+            load_lbl = ClickableLabel(size_hint=(1, None), height=self.title_label.font_size * 0.8,
+                                      color=get_color_from_hex("#444444"), font_size=self.title_label.font_size * 0.6,
+                                      halign="center", text="load more")
+            load_lbl.bind(on_release=self.load_cards)
+            self.slider_container.add_widget(load_lbl)
 
         self.slider_container.resize_v()
 
-        if self.slider_container.height > self.slider.height:
-            self.slider.do_scroll_y = True
-        else:
-            self.slider.do_scroll_y = False
+        # if self.slider_container.height > self.slider.height:
+        #     self.slider.do_scroll_y = True
+        # else:
+        #     self.slider.do_scroll_y = False
+
+        self.slider.do_scroll_y = True
 
         if self.utensils is not None:
             self.update_buttons()
@@ -407,4 +394,5 @@ class CardsCollectionScreen(Screen):
         self.so_empty_lbl = None
 
         self.to_label = []  # list of slider_cards that are chosen to be labeled in show_tags function
-        self.tags_popup = None
+
+        self.loaded_entire_collection = False   # bool var saying whether there should be loaded a label "load more"

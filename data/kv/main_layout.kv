@@ -20,7 +20,7 @@ WindowManager:
             size: self.size
             pos: self.pos
 
-<MenuButton@Button>:
+<MenuButton>:
     size_hint: (1, None)
     height: self.width / 4
     background_color: (0, 0, 0, 0)
@@ -33,25 +33,13 @@ WindowManager:
 
     canvas.before:
 
-
         Color:
             rgba: c("#0e756c")
 
-        Ellipse:
-            size: (self.height, self.height)
-            angle_start: 180
-            angle_end: 0
-            pos: (self.x + self.width - self.height, self.y)
-
-        Ellipse:
-            size: (self.height, self.height)
-            angle_start: 0
-            angle_end: -180
-            pos: (self.x, self.y)
-
-        Rectangle:
-            size: (self.width - self.height, self.height)
-            pos: (self.height / 2 + self.x, self.y)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: (self.width / 7,)
 
 <BackButton@Button>:
     background_color: (0, 0, 0, 0)
@@ -195,7 +183,6 @@ WindowManager:
     background_normal: app.directory + "/data/textures/yes_button_down.png"
     background_down: app.directory + "/data/textures/yes_button_normal.png"
     size_hint_y: None
-    group: "languages"
     color: c("#444444")
     font_size: self.height / 2
 
