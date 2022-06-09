@@ -18,3 +18,4 @@ from .database_settings_screen import DatabaseSettingsScreen
 from .backup_content_screen import BackupContentScreen
 from .revising_settings_screen import RevisingSettingsScreen
 from .revising_screen import RevisingScreen
+from .info_help_screen import InfoHelpScreen

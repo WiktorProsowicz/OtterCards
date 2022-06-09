@@ -19,7 +19,7 @@ class SmartInput(TextInput):
 
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
-            Clock.schedule_once(self._do_hold, .5)
+            Clock.schedule_once(self._do_hold, .3)
             touch.grab(self)
             return super(SmartInput, self).on_touch_down(touch)
 

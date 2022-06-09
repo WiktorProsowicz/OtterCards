@@ -6,7 +6,7 @@ from ..classes.utensils import UtensilDropUp, UtensilButton
 from kivy.metrics import dp
 from kivy.app import App
 from data.flashcards.flashcard_database import FlashcardDataBase, LengthError
-from ..classes.popups import tags_popup, ok_popup
+from ..classes.popups import tags_popup, ok_popup, display_card as display_s_card
 
 
 class CardWaitingRoomScreen(Screen):
@@ -186,13 +186,16 @@ class CardWaitingRoomScreen(Screen):
             self.card_utensils.items["merge_btn"].bind(on_release=self.merge_cards)
             self.card_utensils.items["merge_btn"].change_mode("enabled")
 
+    def display_card(self, slider_card):
+        display_s_card(slider_card, self.size)
+
     def refresh_cards(self):
 
         self.cards_container.clear_widgets()
         for card in self.slider_cards:
             self.cards_container.add_widget(card)
             card.bind(pos=card.draw, width=card.adjust_style)
-            card.bind(size=self.cards_container.resize_v, on_choose=card.toggle_short_long)
+            card.bind(size=self.cards_container.resize_v, on_choose=self.display_card)
             card.bind(on_hold=card.toggle_marked, marked=self.refresh_card_utensils)
             if card.marked:
                 card.toggle_marked()

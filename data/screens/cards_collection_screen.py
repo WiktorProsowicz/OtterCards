@@ -280,7 +280,7 @@ class CardsCollectionScreen(Screen):
             retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "tag", tag=main_filter, limit=50)
             self.title_label.text = main_filter
 
-        retrieved_cards.sort(key=lambda flashcard: (flashcard.last_update, flashcard.id), reverse=True)
+        # retrieved_cards.sort(key=lambda flashcard: (flashcard.last_update, flashcard.id), reverse=True)
         self.loaded_entire_collection = True if len(retrieved_cards) < 50 else False
 
         for card in retrieved_cards:
@@ -302,7 +302,7 @@ class CardsCollectionScreen(Screen):
             retrieved_cards = FlashcardDataBase.retrieve_cards(database_f, "tag", tag=main_filter, limit=50, not_ids=not_ids)
 
         previous_len = len(self.slider_cards)
-        if previous_len == 0:
+        if len(retrieved_cards) < 50:
             self.loaded_entire_collection = True
 
         for card in retrieved_cards:

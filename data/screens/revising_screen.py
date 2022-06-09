@@ -6,6 +6,7 @@ from ..classes.dragged_flashcard import DraggedFlashcard
 from ..flashcards.flashcard_database import FlashcardDataBase
 from kivy.animation import Animation
 from ..classes.popups import ok_popup, yes_no_popup
+from time import time
 
 
 class RevisingScreen(Screen):
@@ -33,6 +34,9 @@ class RevisingScreen(Screen):
                 box_index = (1 + box_index) % len(self.dump_boxes)
 
         FlashcardDataBase.update_compartment(database_f, self.box.id, self.correctly_answered, self.compartment)
+
+        self.box.last_revision = int(time())
+        FlashcardDataBase.insert_box(database_f, self.box)
 
         correct_ratio = len(self.correctly_answered) / len(self.flashcards)
         if correct_ratio <= 0.25:

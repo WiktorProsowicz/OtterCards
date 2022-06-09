@@ -5,18 +5,14 @@ from PIL import Image as PIL_Image, ImageEnhance, ImageOps
 import ocrspace
 from kivy.uix.image import Image
 from kivy.clock import Clock
-from kivy.uix.popup import Popup
-from kivy.utils import get_color_from_hex
 from ..classes.utils import ocr_language_map
 from ..classes.language_button import LanguageButton
-from kivy.uix.button import Button
 from kivy.app import App
 from ..classes.cropping_rectangle import CroppingRectangle
 from requests.exceptions import ConnectionError
-from kivy.graphics import PushMatrix, PopMatrix, Rotate
-from kivy.core.image import Texture
 from kivy.uix.camera import Camera
 from ..classes.popups import ok_popup, loading_popup
+from os import path
 
 
 class AddFromOcrScreen(Screen):
@@ -47,6 +43,11 @@ class AddFromOcrScreen(Screen):
         pil_img = PIL_Image.open(workdir + "/data/ocr_image.png")
         pil_img = ImageEnhance.Sharpness(pil_img).enhance(5)
         # pil_img = pil_img.convert("L")
+        huge_size = path.getsize(workdir + "/data/ocr_image.png")
+        
+        factor = huge_size / 1000000
+        pil_img = pil_img.reduce(int(factor))
+
         pil_img.save(workdir + "/data/ocr_image.png")
 
         loading_pop = loading_popup("scanning image...", self.width)

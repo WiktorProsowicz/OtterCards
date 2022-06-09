@@ -1,0 +1,211 @@
+#:import c kivy.utils.get_color_from_hex
+
+
+<InfoHelpScreen>:
+
+    back_btn: back_btn
+
+    canvas.before:
+        Color:
+            rgba: c("#FFFFFF")
+
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    FloatLayout:
+        id: header
+        size_hint: (0.9, 0.1)
+        pos: (root.center_x - self.width / 2, root.height - root.width / 8 - self.height / 2)
+
+        BackButton:
+            id: back_btn
+            size_hint: (None, 0.7)
+            width: self.height
+            pos_hint: {"x": 0, "center_y": 0.5}
+            on_release: app.switch_screen("main_screen", "right")
+
+    FloatLayout:
+        id: main_layout
+        size_hint: (1, None)
+        height: root.height - root.width / 3
+        pos_hint: {"y": 0, "center_x": 0.5}
+
+        ScrollView:
+            size_hint: (0.85, 1)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            do_scroll_x: False
+            do_scroll_y: True
+            id: slider
+            effect_y: Scroll()
+            bar_inactive_color: (0, 0, 0, 0)
+            bar_color: (0, 0, 0, 0)
+
+            GridLayout:
+                size_hint: (1, None)
+                height: root.height * 5.8
+                cols: 1
+                spacing: dp(10)
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.5
+                    source: app.directory + "/data/textures/idas_otter.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 4
+                    font_size: self.height * 0.35
+                    text: "Welcome to OtterCards!"
+                    color: c("#444444")
+                    halign: "center"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.9
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    text_size: self.size
+                    halign: "left"
+                    text: "We'd like to introduce you to core functionality of our app. \'OtterCards\' allows you to store, edit and use your own flashcard collection to learn almost every kind of knowledge in efficient and convenient way. At the beginning it would be preferable for you to know basic concepts, such as:"
+                    valign: "middle"
+                    line_height: 1.2
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 2
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=178f7f]Cards[/color]\nare divided into hidden and definition side - first for the content you want to learn, second is expository and is used as a hint while revising."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.5
+                    source: app.directory + "/data/textures/card_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.9
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=178f7f]Tags[/color]\nare used instead of folders. You can use them to label cards, what could help you to better organise entire collection. Tags can be used directly on specific tag or dynamically when i.e. collecting cards from dictionary."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.4
+                    source: app.directory + "/data/textures/tag_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.1
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=178f7f]Boxes[/color]\nmake for an equivalent of physical boxes used in flashcard revising method. Boxes are splitted into any number of compartments, which can ensure successful learning process. There is a simple rule: once a card is put inside the box - it goes to the first compartment and after enough good revisions it leaves entire box. There are normal boxes and special ones"
+                    valign: "middle"
+                    line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.2
+                    source: app.directory + "/data/textures/box_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.2
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=178f7f]Revisions[/color]\nare the main part of the learning process. A single revision takes two parameters: a box and compartment number. After seeing every card you need to decide whether you answered correctly (shift right) or not (left). When revising cards from normal box card either stays in its compartment or goes to the next one. In second case flashcard goes to previously pointed box for further revision or is removed from the box (because you apparently mastered it)."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 5
+                    font_size: self.height * 0.35
+                    text: "Where can you take flashcards from?"
+                    color: c("#444444")
+                    text_size: self.size
+                    halign: "center"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 2.4
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=11646b]Card workshop[/color]\nis a place where you can craft cards manually, giving them hidden and definition lines. Additionally you can use pre-made tags to label currently created flashcard."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 2.1
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=11646b]File[/color]\nwith content lines can be used to automatically create card sets. You simply have to point the file path and mark the lines with &bl;hidden pattern&br; (i.e. '*') and &bl;def pattern&br; (i.e. '')."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.1
+                    source: app.directory + "/data/textures/file_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.3
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=11646b]Dictionary[/color]\nentries can be easily converted into flashcard content lines by passing a word or pointing a path to file with a bunch of them. Then you need to choose correct language mode (i.e. english-to-spanish) and specify how many lines, flashcards you want to extract and whether you wish to get hinted words to further searching. Currently used dictionaries: diki.pl, bab.la, mdbg.net, tangorin.com."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.1
+                    source: app.directory + "/data/textures/dictionary_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 2
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=11646b]OCR scanner (experimental)[/color]\n - you can take a photo of content you want to learn. After conversion (with use of Free OCR API from OCRSpace) text can be divided into lines that you can insert to a new flashcard."
+                    valign: "middle"
+                    line_height: 1.2
+
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1
+                    source: app.directory + "/data/textures/ocr_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.7
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    markup: True
+                    text_size: self.size
+                    text: "[color=11646b]Author:[/color]\nWiktor Prosowicz (idea, code, layout&amp;arts)\n[color=11646b]Additionally:[/color]\nIda Maryńczak (arts, auxiliary logo image)\nPaweł Morek (main logo)"
+                    valign: "middle"
+                    line_height: 1.2

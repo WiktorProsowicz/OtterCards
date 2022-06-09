@@ -65,8 +65,6 @@ class BoxWorkshopScreen(Screen):
             self.decrease_btn.disabled = True
             self.increase_btn.disabled = True
 
-            self.decrease_btn.unbind(on_release=self.comps_increaser.decrease)
-            self.increase_btn.unbind(on_release=self.comps_increaser.increase)
             self.comps_increaser.unbind(value=self.base_box_widget.change_nr_compartments)
 
         else:
@@ -77,12 +75,12 @@ class BoxWorkshopScreen(Screen):
             self.decrease_btn.disabled = False
             self.increase_btn.disabled = False
 
-            self.decrease_btn.bind(on_release=self.comps_increaser.decrease)
-            self.increase_btn.bind(on_release=self.comps_increaser.increase)
             self.comps_increaser.bind(value=self.base_box_widget.change_nr_compartments)
 
     def on_enter(self, *args):
         self.base_box_widget.refresh()
+
+        self.is_special_btn.bind(state=self.unable_disable_changes)
 
         # user is not allowed to change "is special" if box is not new
         if self.base_box_widget.box.id is not None:
@@ -96,8 +94,6 @@ class BoxWorkshopScreen(Screen):
         self.is_special_btn.state = "down" if self.base_box_widget.box.is_special else "normal"
 
         self.unable_disable_changes()
-
-        self.is_special_btn.bind(state=self.unable_disable_changes)
 
     def update_color_label(self):
         self.color_label.text = "color #" + self.base_box_widget.box.color
@@ -136,6 +132,9 @@ class BoxWorkshopScreen(Screen):
             self.name_input.bind(text=lambda text_input, text: self.base_box_widget.change_name(text))
 
             self.is_special_btn.bind(state=lambda btn, state: self.base_box_widget.change_special(state == "down"))
+
+            self.decrease_btn.bind(on_release=self.comps_increaser.decrease)
+            self.increase_btn.bind(on_release=self.comps_increaser.increase)
 
             self.settings_bound = True
 

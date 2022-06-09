@@ -107,13 +107,15 @@ class SliderTag(Widget):
 
         self.draw()
 
-    def __init__(self, tag: Tag, index: int,  **kwargs):
+    def __init__(self, tag: Tag, index: int, nmb_of_cards=None, **kwargs):
         super(SliderTag, self).__init__(**kwargs)
 
         self.index = index  # to ensure the difference between "all cards" tag and other - to be removed in the future
 
         self.tag = tag  # Tag object to carry important information
         self.text = "#" + self.tag.name if self.index != 0 else self.tag.name
+        if nmb_of_cards is not None:
+            self.text += f" ({nmb_of_cards})"
 
         self.halign = "left" if self.index != 0 else "center"
         self.valign = "middle"

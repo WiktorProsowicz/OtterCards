@@ -63,6 +63,29 @@ class FlashcardDataBase:
             return normalized if columns_nmb > 1 else normalized[0]
 
     @staticmethod
+    def number_cards_in_tag(database: str, tag: Tag):
+        if not os.path.isfile(database):
+            FlashcardDataBase.create_database(database)
+
+        with sqlite3.connect(database) as connection:
+            cursor = connection.cursor()
+
+            if tag.name != "all cards":
+                get_cards_nmb_q = """
+                    SELECT COUNT(card_id) FROM cards_in_tags WHERE tag_id = ?;
+                """
+                args = (tag.id,)
+                ret = FlashcardDataBase.normalize_result(cursor.execute(get_cards_nmb_q, args).fetchall())[0]
+
+            else:
+                get_cards_nmb_q = """
+                    SELECT COUNT(id) FROM cards;
+                """
+                ret = FlashcardDataBase.normalize_result(cursor.execute(get_cards_nmb_q).fetchall())[0]
+
+            return ret
+
+    @staticmethod
     def is_card_in_box(database: str, flashcard: Flashcard, box: Box) -> bool:
         if not os.path.isfile(database):
             FlashcardDataBase.create_database(database)
@@ -530,13 +553,14 @@ class FlashcardDataBase:
             if box_id is None:
 
                 get_boxes_q = """
-                    SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date FROM boxes;
+                    SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date, last_revision
+                    FROM boxes;
                 """
                 boxes_info = FlashcardDataBase.normalize_result(cursor.execute(get_boxes_q).fetchall())
             else:
                 get_boxes_q = """
-                    SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date FROM boxes
-                    WHERE id = ?;
+                    SELECT id, name, nr_compartments, last_update, color, special, cards_left, creation_date, last_revision
+                    FROM boxes WHERE id = ?;
                 """
                 boxes_info = FlashcardDataBase.normalize_result(cursor.execute(get_boxes_q, (box_id,)).fetchall())
 
@@ -545,11 +569,11 @@ class FlashcardDataBase:
 
             box_ids, names, nrs_comp = boxes_info[0], boxes_info[1], boxes_info[2]
             update_dates, colors, specials = boxes_info[3], boxes_info[4], boxes_info[5]
-            cards_lefts, creation_dates = boxes_info[6], boxes_info[7]
+            cards_lefts, creation_dates, last_revisions = boxes_info[6], boxes_info[7], boxes_info[8]
 
             boxes = []
-            for box_id, name, nr_compartments, last_update, color, special, cards_left, creation_date in \
-                    zip(box_ids, names, nrs_comp, update_dates, colors, specials, cards_lefts, creation_dates):
+            for box_id, name, nr_compartments, last_update, color, special, cards_left, creation_date, last_revision in \
+                    zip(box_ids, names, nrs_comp, update_dates, colors, specials, cards_lefts, creation_dates, last_revisions):
 
                 name = name.decode(encoding="UTF-8", errors="replace")
 
@@ -561,7 +585,7 @@ class FlashcardDataBase:
 
                 boxes.append(Box(id=box_id, name=name, nr_compartments=nr_compartments,
                                  last_update=last_update, color=color, nr_cards=nr_cards, is_special=bool(special),
-                                 cards_left=cards_left, creation_date=creation_date))
+                                 cards_left=cards_left, creation_date=creation_date, last_revision=last_revision))
 
         return boxes
 
@@ -579,7 +603,7 @@ class FlashcardDataBase:
             # /////// preparing ids depending on mode ////////////
             if mode == "all":
                 get_all_ids_q = """
-                    SELECT id FROM cards;
+                    SELECT id FROM cards ORDER BY last_update DESC;
                 """
                 card_ids = FlashcardDataBase.normalize_result(cursor.execute(get_all_ids_q).fetchall())
 
@@ -705,7 +729,8 @@ class FlashcardDataBase:
                         args = (comp_nr + 1, flashcard.id, box_id)
                         cursor.execute(shift_card_q, args)
 
-            box_update_q = "UPDATE boxes SET last_update = ?, cards_left = cards_left + ? WHERE id = ?;"
+            box_update_q = "UPDATE boxes SET last_update = ?, cards_left = cards_left + ?" \
+                           "WHERE id = ?;"
             args = (int(time()), cards_left_count, box_id)
 
             cursor.execute(box_update_q, args)
@@ -721,6 +746,7 @@ class FlashcardDataBase:
         box_id = box.id
         name = box.name.encode(encoding="UTF-8", errors="replace")
         is_special = box.is_special
+        last_revision = box.last_revision
 
         color = "ffffff" if color is None else color
         if not is_viable_color(color):
@@ -777,9 +803,10 @@ class FlashcardDataBase:
                 cursor.execute(delete_above_comp_nr_q, args)
 
                 update_box_q = """
-                    UPDATE boxes SET name = ?, color = ?, nr_compartments = ?, last_update = ? WHERE id = ?;
+                    UPDATE boxes SET name = ?, color = ?, nr_compartments = ?, last_update = ?, last_revision = ? 
+                    WHERE id = ?;
                 """
-                args = (name, color, comp_nr, int(time()), box_id)
+                args = (name, color, comp_nr, int(time()), last_revision, box_id)
                 cursor.execute(update_box_q, args)
 
             connection.commit()
@@ -1049,7 +1076,8 @@ class FlashcardDataBase:
                     creation_date TIMESTAMP NOT NULL,
                     last_update TIMESTAMP NOT NULL,
                     special BOOLEAN NOT NULL,
-                    cards_left INT NOT NULL
+                    cards_left INT NOT NULL,
+                    last_revision TIMESTAMP
                 );
             """
 

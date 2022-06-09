@@ -1,6 +1,6 @@
 from os.path import isfile
 from data.flashcards.flashcard_database import Flashcard
-from .extracting_from_dictionaries import get_entries_from_diki, get_to_english_from_babla
+from .extracting_from_dictionaries import get_entries_from_diki, get_to_english_from_babla, get_chinese_words_from_mdbg
 from .flashcards.flashcards_exceptions import DictionaryError
 
 
@@ -88,29 +88,32 @@ def get_cards_from_dictionary(filename: str, mode: str, subdefs_limit: int = Non
 
         try:
             if mode == "english_to_polish" or mode == "polish_to_english":
-                entires, extras = get_entries_from_diki(word, "english", subdefs_limit, flashcards_limit, get_hinted)
+                entries, extras = get_entries_from_diki(word, "english", subdefs_limit, flashcards_limit, get_hinted)
 
             elif mode == "german_to_polish" or mode == "polish_to_german":
-                entires, extras = get_entries_from_diki(word, "german", subdefs_limit, flashcards_limit, get_hinted)
+                entries, extras = get_entries_from_diki(word, "german", subdefs_limit, flashcards_limit, get_hinted)
 
-            elif mode in ["english_to_arabic", "arabic_to_english", "english_to_danish", "danish_to_english",
+            elif mode in ("english_to_arabic", "arabic_to_english", "english_to_danish", "danish_to_english",
                           "english_to_dutch", "dutch_to_english", "english_to_finnish", "finnish_to_english",
                           "english_to_german", "german_to_english", "english_to_greek", "greek_to_english",
                           "english_to_hindi", "hindi_to_english", "english_to_norwegian", "norwegian_to_english",
                           "english_to_italian", "italian_to_english", "english_to_portuguese", "portuguese_to_english",
                           "russian_to_english", "english_to_russian", "english_to_spanish", "spanish_to_english",
-                          "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english"]:
+                          "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english"):
 
                 l = [l for l in mode.split("_to_") if l != "english"][0]
-                entires, extras = get_to_english_from_babla(word, l, subdefs_limit, flashcards_limit, get_hinted)
+                entries, extras = get_to_english_from_babla(word, l, subdefs_limit, flashcards_limit, get_hinted)
+
+            elif mode in ("chinese_to_english", "english_to_chinese"):
+                entries, extras = get_chinese_words_from_mdbg(word, mode, subdefs_limit, flashcards_limit)
 
         except DictionaryError:
             exceptions.append(word)
 
         else:
-            while entires:
-                hidden_lines = entires.pop(0)
-                def_lines = entires.pop(0)
+            while entries:
+                hidden_lines = entries.pop(0)
+                def_lines = entries.pop(0)
                 flashcards.append(Flashcard(id=None, def_lines=def_lines, hidden_lines=hidden_lines))
 
             for extra in extras:

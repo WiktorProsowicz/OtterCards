@@ -2,7 +2,6 @@ from kivy.properties import ObjectProperty
 from .add_from_file_screen import AddFromFileScreen
 from kivy.uix.screenmanager import Screen
 from kivy.cache import Cache
-from kivy.uix.button import Button
 from kivy.utils import get_color_from_hex
 from kivy.uix.popup import Popup
 from kivy.effects.scroll import ScrollEffect
@@ -13,7 +12,9 @@ from kivy.metrics import dp
 from ..data_processing import get_cards_from_dictionary
 from data.flashcards.flashcard_database import FlashcardDataBase
 from kivy.app import App
-from ..classes.popups import ok_popup
+from ..classes.popups import ok_popup, loading_popup
+from ..extracting_from_dictionaries import get_dictionary_from_language_mode
+from kivy.clock import Clock
 
 
 class AddFromDictionaryScreen(Screen):
@@ -38,6 +39,7 @@ class AddFromDictionaryScreen(Screen):
     subdefs_increaser = ObjectProperty(None)
     language_mode = ObjectProperty(None)
     get_hinted_button = ObjectProperty(None)
+    word_input = ObjectProperty(None)
 
     def show_language_modes(self):
         # preparing tag popup
@@ -65,7 +67,8 @@ class AddFromDictionaryScreen(Screen):
                  "english_to_hindi", "hindi_to_english", "english_to_norwegian", "norwegian_to_english",
                  "english_to_italian", "italian_to_english", "english_to_portuguese", "portuguese_to_english",
                  "russian_to_english", "english_to_russian", "english_to_spanish", "spanish_to_english",
-                 "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english"]
+                 "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english",
+                 "english_to_chinese", "chinese_to_english"]
         modes.sort()
 
         for mode in modes:
@@ -97,8 +100,26 @@ class AddFromDictionaryScreen(Screen):
 
             warning_pop.open()
 
+        elif self.pages.page == 1 and self.word_input.text == "":
+            warning_pop = ok_popup("you have to pass a word before processing", self.width, 0.9 / 2.5)
+
+            warning_pop.open()
+
+        elif self.pages.page == 0 and self.selected_file is None:
+
+            warning_pop = ok_popup("you have to choose a file before processing", self.width, 0.9 / 2.5)
+
+            warning_pop.open()
+
         else:
-            AddFromFileScreen.submit(self)
+
+            loading_pop = loading_popup("collecting cards...", self.width)
+
+            loading_pop.open()
+
+            Clock.schedule_once(lambda nt: self.pre_save_cards(), .2)
+
+            Clock.schedule_once(lambda nt: loading_pop.dismiss(), .2)
 
     def pre_save_cards(self):
 
@@ -109,9 +130,17 @@ class AddFromDictionaryScreen(Screen):
         get_hinted = True if self.get_hinted_button.state == "down" else False
         language_mode = self.language_mode.language_mode
 
-        retrieved_cards, extras, exceptions = get_cards_from_dictionary(self.selected_file, language_mode,
-                                                                        subdefs_limit,
-                                                                        cards_limit, get_hinted)
+        Cache.append("dict_waiting_room", "dictionary", get_dictionary_from_language_mode(language_mode))
+
+        if self.pages.page == 0:
+            retrieved_cards, extras, exceptions = get_cards_from_dictionary(self.selected_file, language_mode,
+                                                                            subdefs_limit,
+                                                                            cards_limit, get_hinted)
+        else:
+            retrieved_cards, extras, exceptions = get_cards_from_dictionary("", language_mode,
+                                                                            subdefs_limit,
+                                                                            cards_limit, get_hinted,
+                                                                            words=[self.word_input.text])
 
         for card in retrieved_cards:
             card.tags = tagnames.copy()
@@ -157,15 +186,17 @@ class AddFromDictionaryScreen(Screen):
         self.selected_file = None
         self.filename_label.text = "no files chosen yet"
 
+        self.pages.page = 1
+
+        Clock.schedule_once(lambda nt: self.cards_increaser.draw(), 0.07)
+        Clock.schedule_once(lambda nt: self.subdefs_increaser.draw(), 0.07)
+        Clock.schedule_once(lambda nt: self.language_mode.draw(), 0.07)
+
     def on_enter(self, *args):
         self.cards_increaser.value = 3
-        self.cards_increaser.draw()
-
         self.subdefs_increaser.value = 5
-        self.subdefs_increaser.draw()
-
         self.language_mode.language_mode = None
-        self.language_mode.draw()
+        self.word_input.text = ""
 
     def __init__(self, **kwargs):
         super(AddFromDictionaryScreen, self).__init__(**kwargs)

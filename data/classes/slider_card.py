@@ -52,8 +52,8 @@ class SliderCard(Widget):
 
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
-            Clock.schedule_once(self._do_hold, .15)     # card is held after specific time
-            Clock.schedule_once(lambda nt: touch.ungrab(self), .15)  # after specific time touch up won't trigger on_choose
+            Clock.schedule_once(self._do_hold, .25)     # card is held after specific time
+            Clock.schedule_once(lambda nt: touch.ungrab(self), .25)  # after specific time touch up won't trigger on_choose
             touch.grab(self)
             return super(SliderCard, self).on_touch_down(touch)
 

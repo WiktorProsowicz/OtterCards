@@ -37,7 +37,7 @@
         BackButton:
             id: back_btn
             size_hint: (None, None)
-            size: (header.height, header.height * 0.7)
+            size: (header.height * 0.7, header.height * 0.7)
             x: header.x
             top: header.top
             on_release: root.discard()
@@ -58,7 +58,7 @@
         ApproveButton:
             id: approve_btn
             size_hint: (None, None)
-            size: (header.height, header.height * 0.7)
+            size: (header.height * 0.7, header.height * 0.7)
             top: header.top
             x: header.right - self.width
             on_release: root.proceed()

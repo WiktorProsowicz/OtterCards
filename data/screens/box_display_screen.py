@@ -13,6 +13,7 @@ from ..classes.horizontal_slider_tag import HorizontalSliderTag
 from ..classes.slider_card import SliderCard
 from kivy.uix.label import Label
 from ..classes.utensils import UtensilDropUp, UtensilButton
+from ..classes.popups import display_card as display_s_card
 
 
 class BoxDisplayScreen(Screen):
@@ -234,6 +235,9 @@ class BoxDisplayScreen(Screen):
 
         self.left_slider.scroll_y = 1
 
+    def display_card(self, slider_card):
+        display_s_card(slider_card, self.size)
+
     def refresh_right(self):
         self.right_container.clear_widgets()
         for card in self.r_slider_cards:
@@ -241,8 +245,8 @@ class BoxDisplayScreen(Screen):
                 card.toggle_marked()
 
             card.bind(pos=card.draw, width=card.adjust_style)
-            card.bind(size=self.right_container.resize_v, on_choose=card.toggle_marked)
-            card.bind(marked=self.refresh_right_utensils)
+            card.bind(size=self.right_container.resize_v, on_hold=card.toggle_marked)
+            card.bind(marked=self.refresh_right_utensils, on_choose=self.display_card)
             self.right_container.add_widget(card)
 
         self.right_container.bind(height=self.enable_disable_scroll)

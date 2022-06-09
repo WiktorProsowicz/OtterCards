@@ -168,12 +168,17 @@ class TagsCollectionScreen(Screen):
 
         # preparing all tags
         database_f = Cache.get("app_info", "database_dir")
-        self.slider_tags = [SliderTag(Tag(0, "all cards", "AAAAAA"), 0)]  # first tag
+
+        first_tag = Tag(0, "all cards", "AAAAAA")
+        num_of_all_cards = FlashcardDataBase.number_cards_in_tag(database_f, first_tag)
+        self.slider_tags = [SliderTag(first_tag, 0, num_of_all_cards)]
+
         retrieved_tags = FlashcardDataBase.retrieve_tags(database_f)
         retrieved_tags.sort(key=lambda tag: tag.last_update, reverse=True)
         
         for tag_index, tag in enumerate(retrieved_tags, 1):
-            self.slider_tags.append(SliderTag(tag, tag_index))
+            num_cards = FlashcardDataBase.number_cards_in_tag(database_f, tag)
+            self.slider_tags.append(SliderTag(tag, tag_index, num_cards))
 
         Clock.schedule_once(lambda nt: self.refresh(), 0.05)
 

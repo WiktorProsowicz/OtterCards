@@ -10,7 +10,10 @@ class ManualIncreaser(Widget):
     value = NumericProperty(0)
 
     def increase(self, *args):
-        if self.max_value is not None and self.value < self.max_value:
+        if self.max_value is not None:
+            if self.value < self.max_value:
+                self.value += 1
+        else:
             self.value += 1
 
     def decrease(self, *args):

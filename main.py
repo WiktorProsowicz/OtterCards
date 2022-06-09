@@ -19,7 +19,7 @@ import ctypes
 from data.screens import AddCardsScreen, AddFromDictionaryScreen, AddFromFileScreen, AddFromOcrScreen, BackupContentScreen, \
     BoxDisplayScreen, BoxWorkshopScreen, BoxesCollectionScreen, CardChunksScreen, CardWaitingRoomScreen, \
     CardWorkshopScreen, CardsCollectionScreen, CardsScreen, DatabaseSettingsScreen, DictWaitingRoomScreen, \
-    MainScreen, RevisingScreen, RevisingSettingsScreen, TagWorkshopScreen, TagsCollectionScreen
+    MainScreen, RevisingScreen, RevisingSettingsScreen, TagWorkshopScreen, TagsCollectionScreen, InfoHelpScreen
 
 from data.flashcards.flashcard_database import FlashcardDataBase
 
@@ -88,7 +88,8 @@ class OtterCardsApp(App):
         Cache.register("cards_collection")  # main_filter,
         Cache.register("card_workshop")  # base_card, aux_mode
         Cache.register("card_waiting_room")  # card_ids
-        Cache.register("dict_waiting_room")  # card_ids, extras, exceptions, language_mode, subdefs_limit, cards_limit, get_hinted
+        Cache.register("dict_waiting_room")  # card_ids, extras, exceptions, language_mode,
+        # subdefs_limit, cards_limit, get_hinted, dictionary
         Cache.register("card_chunks")   # new_chunk
         Cache.register("box_display")   # base_box
         Cache.register("box_workshop")   # base_box
@@ -156,7 +157,7 @@ class OtterCardsApp(App):
                         "card_waiting_room_screen", "add_from_dictionary_screen", "dict_waiting_room_screen",
                         "add_from_ocr_screen", "card_chunks_screen", "boxes_collection_screen", "box_display_screen",
                         "box_workshop_screen", "database_settings_screen", "backup_content_screen",
-                        "revising_settings_screen", "revising_screen"]  # ...
+                        "revising_settings_screen", "revising_screen", "info_help_screen"]  # ...
 
         path_to_kv = Cache.get("app_info", "work_dir") + "/data/kv/" + Cache.get("app_info", "size_prefix") + "_"
         kv_filenames = [path_to_kv + name + ".kv" for name in screen_names]
@@ -186,7 +187,8 @@ class OtterCardsApp(App):
                        DatabaseSettingsScreen(name="database_settings_screen"),
                        BackupContentScreen(name="backup_content_screen"),
                        RevisingSettingsScreen(name="revising_settings_screen"),
-                       RevisingScreen(name="revising_screen")]
+                       RevisingScreen(name="revising_screen"),
+                       InfoHelpScreen(name="info_help_screen")]
 
         self.window_manager = WindowManager(transition=SlideTransition())
 
@@ -195,7 +197,7 @@ class OtterCardsApp(App):
         # ...
 
         # /// dev //////////////////////////////////////////
-
+        # self.window_manager.current = "add_from_dictionary_screen"
         # /////////////////////////////////////////////////
 
         Window.bind(on_keyboard=self.go_back)

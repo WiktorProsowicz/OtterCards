@@ -265,6 +265,9 @@ class DictWaitingRoomScreen(Screen):
         else:
             self.exceptions_slider.do_scroll_y = False
 
+    def display_card(self, slider_card):
+        CardWaitingRoomScreen.display_card(self, slider_card)
+
     def label_cards(self, slider_tag):
         CardWaitingRoomScreen.label_cards(self, slider_tag)
 
@@ -360,6 +363,9 @@ class DictWaitingRoomScreen(Screen):
 
         retrieved_cards = FlashcardDataBase.retrieve_cards(aux_database_f, "id", ids=card_ids)
         FlashcardDataBase.mark_redundant(database_f, retrieved_cards)
+
+        dictionary = Cache.get("dict_waiting_room", "dictionary")
+        self.title_label.text = f"collected results from {dictionary}"
 
         self.slider_cards.clear()
         self.slider_exceptions.clear()

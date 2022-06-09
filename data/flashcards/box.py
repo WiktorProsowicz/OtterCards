@@ -17,5 +17,6 @@ class Box:
         self.creation_date = kwargs.get("creation_date", 0)
         self.is_special = kwargs.get("is_special", False)
         self.cards_left = kwargs.get("cards_left", 0)
+        self.last_revision = kwargs.get("last_revision", None)
 
         self.is_redundant = kwargs.get("is_redundant", False)

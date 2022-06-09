@@ -61,10 +61,10 @@ class RevisingSettingsScreen(Screen):
 
         if self.increaser.value == 1:
             self.increase_btn.opacity = 1
-            self.decrease_btn.opacity = 0.5
+            self.decrease_btn.opacity = 0.3
 
         elif self.increaser.value == self.normal_box.box.nr_compartments:
-            self.increase_btn.opacity = 0.5
+            self.increase_btn.opacity = 0.3
             self.decrease_btn.opacity = 1
 
         else:
@@ -140,7 +140,7 @@ class RevisingSettingsScreen(Screen):
         self.boxes_slider.scroll_y = 1
 
     def on_leave(self, *args):
-        self.dump_boxes_cnt.clear_widgets()
+        self.dump_boxes.clear()
 
     def on_pre_enter(self, *args):
         database_f = Cache.get("app_info", "database_dir")

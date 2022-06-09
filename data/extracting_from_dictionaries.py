@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from urllib import request, error
 from .flashcards.flashcards_exceptions import DictionaryError
 
@@ -31,6 +31,26 @@ def prettify(word: str):
             new_str += str(char)[2:-1].replace("\\x", "%")
 
     return new_str
+
+
+def get_dictionary_from_language_mode(language_mode: str) -> str:
+    if language_mode in ("polish_to_german", "polish_to_english", "english_to_polish", "german_to_polish"):
+        return "diki.pl"
+
+    elif language_mode in ("english_to_arabic", "arabic_to_english", "english_to_danish", "danish_to_english",
+                           "english_to_dutch", "dutch_to_english", "english_to_finnish", "finnish_to_english",
+                           "english_to_german", "german_to_english", "english_to_greek", "greek_to_english",
+                           "english_to_hindi", "hindi_to_english", "english_to_norwegian", "norwegian_to_english",
+                           "english_to_italian", "italian_to_english", "english_to_portuguese", "portuguese_to_english",
+                           "russian_to_english", "english_to_russian", "english_to_spanish", "spanish_to_english",
+                           "english_to_swedish", "swedish_to_english", "english_to_turkish", "turkish_to_english"):
+        return "bab.la"
+
+    elif language_mode in ("chinese_to_english", "english_to_chinese"):
+        return "mdbg.net"
+
+    elif language_mode in ("english_to_japanese", "japanese_to_english"):
+        return "tangorin.com"
 
 
 def get_entries_from_diki(word: str, language: str, subdefs_limit: int, flashcards_limit: int,
@@ -120,8 +140,7 @@ def get_entries_from_diki(word: str, language: str, subdefs_limit: int, flashcar
 
 
 def get_to_english_from_babla(word: str, language: str, subdefs_limit: int, flashcards_limit: int, get_hinted: bool,
-                                   **kwargs) -> tuple:
-
+                              **kwargs) -> tuple:
     language_url_map = {
         "russian": "https://www.babla.ru/%D0%B0%D0%BD%D0%B3%D0%BB%D0%B8%D0%B9%D1%81%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/",
         "spanish": "https://en.bab.la/dictionary/english-spanish/",
@@ -142,7 +161,8 @@ def get_to_english_from_babla(word: str, language: str, subdefs_limit: int, flas
 
     url = language_url_map[language] + prettify(word)
 
-    hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
     try:
         plain_html = request.urlopen(request.Request(url, headers=hdr))
@@ -205,7 +225,7 @@ def get_to_english_from_babla(word: str, language: str, subdefs_limit: int, flas
     return entries, extras
 
 
-def get_chinese_words_from_mdbg(word: str, l_mode: str, subdefs_limit: int, flashcards_limit: int, get_hinted: bool) -> tuple:
+def get_chinese_words_from_mdbg(word: str, l_mode: str, subdefs_limit: int, flashcards_limit: int) -> tuple:
 
     url = f"https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb={prettify(word)}"
 
@@ -223,3 +243,100 @@ def get_chinese_words_from_mdbg(word: str, l_mode: str, subdefs_limit: int, flas
     if words_table is None:
         raise DictionaryError
 
+    entries = []
+
+    for row in words_table.find_all("tr", {"class": "row"}, limit=flashcards_limit):
+
+        head = row.find("td", {"class": "head"})
+
+        hanzi = head.find("div", {"class": "hanzi"}).get_text()
+        pinyin = head.find("div", {"class": "pinyin"}).get_text().replace("\u200b", "")
+
+        chinese_part = f"{hanzi} ({pinyin})"
+
+        details = row.find("td", {"class": "details"})
+
+        children = details.find("div", {"class": "defs"}, recursive=False).children
+
+        def divide_by_strong_slash(tags):
+            ret = []
+            for tag in tags:
+                if tag.name == "strong":
+                    yield ret
+                    ret.clear()
+                else:
+                    ret.append(tag)
+            yield ret
+
+        definitions = []
+        for tag_list in divide_by_strong_slash(children):
+            if len(tag_list) == 1 and tag_list[0].__class__ == NavigableString:
+                definitions.append(tag_list[0].get_text().strip())
+
+        if len(definitions) > subdefs_limit:
+            definitions = definitions[:subdefs_limit]
+
+        if l_mode == "chinese_to_english":
+
+            entries.append((chinese_part,))
+            entries.append(tuple(definitions))
+
+        else:
+
+            entries.append(tuple(definitions))
+            entries.append((chinese_part,))
+
+    return entries, []
+
+
+def get_english_japanese_from_tangorin(word: str, l_mode: str, subdefs_limit: int, flashcard_limit: int, **kwargs):
+
+    url = f"https://tangorin.com/words?search={prettify(word)}"
+
+    try:
+        plain_html = request.urlopen(url)
+
+    except error.URLError:
+        raise DictionaryError
+
+    soup = BeautifulSoup(plain_html, "html.parser")
+
+    results_group = soup.find("section", {"class": "results-group"})
+    result_list = results_group.find("dl", {"class": "results-dl"})
+
+    entries = []
+
+    for list_item in result_list.find_all("div", {"class": "wordDefinition"}, limit=flashcard_limit):
+        header = list_item.find("dt", {"class": "w-jp"})
+        defs = list_item.find("dd", {"class": "w-dd"})
+
+        dfn = header.find("dfn")
+        star_section = dfn.find("sup")
+        if star_section is not None:
+            star_section.extract()
+
+        main_japanese = dfn.get_text().strip()
+
+        hidden = [main_japanese]
+        addit_parts = header.find("span", {"class": "w-jpn-sm"})
+
+        if addit_parts is not None:
+            for ruby in addit_parts.find_all("ruby"):
+                japanese = ruby.get_text().strip()
+                latin = ruby.find("rt", {"class": "roma"}).get_text().strip()
+
+                hidden.append(f"{japanese} ({latin})")
+
+        def_lines = []
+        eng_list = defs.find_all("ul", {"class": "w-def"}, limit=subdefs_limit)
+        for line in eng_list:
+            arrow_reference = line.find("span", {"class": "w-syn"})
+            if arrow_reference is not None:
+                arrow_reference.extract()
+
+            def_lines.append(line.get_text().strip())
+
+        entries.append(tuple(hidden))
+        entries.append(tuple(def_lines))
+
+    return entries, []

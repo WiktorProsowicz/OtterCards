@@ -1,12 +1,13 @@
-from data.extracting_from_dictionaries import get_entries_from_diki, get_to_english_from_babla
+from PIL import Image as PIL_Image, ImageEnhance, ImageOps
+from os import path
 
+pil_img = PIL_Image.open("huge_image.png")
+pil_img = ImageEnhance.Sharpness(pil_img).enhance(5)
 
-c, e = get_to_english_from_babla("love", "finnish", 5, 10, True)
+huge_size = path.getsize("huge_image.png")
+factor = huge_size / 1000000
 
-print("----entries ---- ")
-for card in c:
-    print(card)
-
-print("----extras-----")
-for extra in e:
-    print(extra)
+pil_img = pil_img.reduce(int(factor))
+# pil_img = pil_img.convert("L")
+pil_img.save("small_image.png")
+print(path.getsize("small_image.png"))

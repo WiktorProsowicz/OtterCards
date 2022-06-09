@@ -4,6 +4,8 @@ from kivy.core.text import Label as CoreLabel
 from kivy.graphics import Color, RoundedRectangle, Rectangle, Line
 from kivy.cache import Cache
 from kivy.metrics import dp
+from datetime import time as ttime
+from time import time
 
 
 class PresentationBox(Widget):
@@ -92,6 +94,36 @@ class PresentationBox(Widget):
                       pos=(self.x + self.width / 2 - self.core_l.texture.width / 2,
                            self.y + self.height / 6 - self.core_l.texture.height / 2),
                       texture=self.core_l.texture)
+
+            if self.box.last_revision is not None:
+
+                s = int(time()) - self.box.last_revision
+                m = s // 60
+                h = m // 60
+                d = h // 24
+
+                s = s % 60
+                m = m % 60
+                h = h % 24
+
+                if d > 99:
+                    txt = "+99d"
+                elif d > 0:
+                    txt = f"{d}d"
+                elif h > 0:
+                    txt = f"{h}h"
+                elif m > 0:
+                    txt = f"{m}m"
+                else:
+                    txt = f"{s}s"
+
+                revision_lbl = CoreLabel(text=txt, font_size=self.width / 7)
+
+                revision_lbl.refresh()
+                Color(rgba=get_color_from_hex("#105e4d"))
+                Rectangle(size=(revision_lbl.texture.width, revision_lbl.texture.height),
+                          pos=(self.x - dp(3),
+                               self.top - revision_lbl.texture.height), texture=revision_lbl.texture)
 
     def __init__(self, **kwargs):
         super(PresentationBox, self).__init__(**kwargs)
