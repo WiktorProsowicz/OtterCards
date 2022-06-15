@@ -196,7 +196,7 @@ class OtterCardsApp(App):
             self.window_manager.add_widget(screen)
         # ...
 
-        # /// dev //////////////////////////////////////////
+        # /// dev /////////////////////////////////////////
         # self.window_manager.current = "add_from_dictionary_screen"
         # ///////////////////////////////////////////////
 
