@@ -34,23 +34,23 @@
 
         BackButton:
             id: back_btn
-            size_hint: (None, 0.7)
+            size_hint: (None, 0.6)
             width: self.height
             pos_hint: {"x": 0, "center_y": 0.5}
             on_release: root.discard()
 
         Label:
-            size_hint: (0.7, 1)
+            size_hint: (0.65, 1)
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            text: "create a card from chunks of text"
+            text: "create cards from chunks of text"
             halign: "center"
-            font_size: self.height / 3
+            font_size: self.height / 3.3
             color: c("#444444")
             text_size: self.size
 
         ApproveButton:
             id: approve_btn
-            size_hint: (None, 0.7)
+            size_hint: (None, 0.6)
             width: self.height
             pos_hint: {"right": 1, "center_y": 0.5}
             on_release: root.save()

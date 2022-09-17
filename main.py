@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.config import Config
 from os import curdir, path, environ
+from data.classes.otter_cards_config import OtterCardsConfig
 
 Config.read("data/config/OtterCards.ini")
 environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
@@ -57,6 +58,7 @@ class OtterCardsApp(App):
             "left": "right",
             "right": "left"
         }
+
         if direction == "inverted":
             self.window_manager.transition.direction = direction_map[self.window_manager.transition.direction]
         else:
@@ -75,7 +77,7 @@ class OtterCardsApp(App):
         FlashcardDataBase.clear_database(aux_database_f)
 
     def on_stop(self):
-        pass
+        OtterCardsConfig.save()
 
     def go_back(self, window, key, *largs):
         if key == 27 and hasattr(self.window_manager.current_screen, "back_btn"):
@@ -121,14 +123,6 @@ class OtterCardsApp(App):
 
         else:
             Cache.append("app_info", "rootpath", "/storage/emulated/0")
-            from android.permissions import Permission, request_permissions
-
-            def perms_callback(permission, results):
-                if not all([result for result in results]):
-                    self.stop()
-
-            request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE,
-                                 Permission.CAMERA, Permission.INTERNET], perms_callback)
 
     def build(self):
         # getting window size regardless of the platform
@@ -150,6 +144,7 @@ class OtterCardsApp(App):
 
         prefix = "xs"
         Cache.append("app_info", "size_prefix", prefix)
+        OtterCardsConfig.read(Cache.get("app_info", "work_dir") + "/data/config/user_preferences.ini")
 
         # loading all kv files
         screen_names = ["main_screen", "cards_screen", "tags_collection_screen", "tag_workshop_screen",
@@ -202,7 +197,7 @@ class OtterCardsApp(App):
 
         Window.bind(on_keyboard=self.go_back)
 
-        self.icon = Cache.get("app_info", "work_dir") + "/data/textures/logo.png"
+        self.icon = Cache.get("app_info", "work_dir") + "/logo.png"
         self.title = "OtterCardsApp"
         return self.window_manager
 

@@ -84,7 +84,7 @@
             size: main_layout.size
             pos: main_layout.pos
             swipe_threshold: .2
-            border: self.width * 0.1
+            border: self.width * 0.15
             on_page: root.hide_utensils()
 
             FloatLayout:
@@ -171,7 +171,7 @@
 
                 ScrollView:
                     id: cards_slider
-                    size_hint: (0.9, 0.9)
+                    size_hint: (0.95, 0.9)
                     pos_hint: {"center_x": 0.5, "y": 0}
                     do_scroll_x: False
                     effect_y: Scroll()

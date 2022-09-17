@@ -266,7 +266,6 @@ class CardsCollectionScreen(Screen):
             self.more_btn.bind(on_release=self.utensils.toggle)
             self.ids["additional_layout"].add_widget(self.utensils)
 
-        self.empty_info()
         self.update_buttons()
 
     def on_pre_enter(self, *args):
@@ -343,6 +342,8 @@ class CardsCollectionScreen(Screen):
         if self.utensils is not None:
             self.update_buttons()
 
+        self.empty_info()
+
     def update_buttons(self):
         # buttons actions and appearance based on number of cards
         if self.slider_cards:
@@ -363,23 +364,21 @@ class CardsCollectionScreen(Screen):
 
     def empty_info(self):
         # adding encouraging label in case there are no tags
-        if not self.slider_cards:
+        if not self.slider_cards and self.so_empty_lbl not in self.main_layout.children:
 
-            if self.slider_cards and self.so_empty_lbl in self.main_layout.children:
-                self.main_layout.remove_widget(self.so_empty_lbl)
+            if self.so_empty_lbl is None:
+                if Cache.get("cards_collection", "main_filter") == "all":
+                    text = "so empty...\nconsider adding some cards!"
+                else:
+                    text = "so empty...\nconsider labelling some cards\nwith this tag!"
 
-            if Cache.get("cards_collection", "main_filter") == "all":
-                text = "so empty...\nconsider adding some cards!"
-            else:
-                text = "so empty...\nconsider labelling some cards\nwith this tag!"
-
-            self.so_empty_lbl = Label(text=text, size_hint=(1, None),
-                                      pos_hint={"center_y": 0.7, "center_x": 0.5},
-                                      color=get_color_from_hex("#AAAAAA"), font_size=self.slider_container.width * 0.07)
+                self.so_empty_lbl = Label(text=text, size_hint=(1, None),
+                                          pos_hint={"center_y": 0.7, "center_x": 0.5},
+                                          color=get_color_from_hex("#AAAAAA"), font_size=self.slider_container.width * 0.07)
 
             self.main_layout.add_widget(self.so_empty_lbl)
 
-        elif self.slider_cards and self.so_empty_lbl in self.main_layout.children:
+        elif self.so_empty_lbl in self.main_layout.children:
             self.main_layout.remove_widget(self.so_empty_lbl)
 
     def __init__(self, **kwargs):

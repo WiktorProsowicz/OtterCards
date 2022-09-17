@@ -10,7 +10,7 @@ from ..classes.language_button import LanguageButton
 from kivy.app import App
 from ..classes.cropping_rectangle import CroppingRectangle
 from requests.exceptions import ConnectionError
-from kivy.uix.camera import Camera
+from ..classes.my_camera import MyCamera
 from ..classes.popups import ok_popup, loading_popup
 from os import path
 
@@ -29,11 +29,12 @@ class AddFromOcrScreen(Screen):
     flip_right_btn = ObjectProperty(None)
 
     def change_camera(self):
-        try:
-            self.camera.index += 1
-
-        except AttributeError:
-            self.camera.index = 0
+        # try:
+        #     self.camera.index += 1
+        #
+        # except AttributeError:
+        #     self.camera.index = 0
+        pass
 
     def save_frame(self, *args):
 
@@ -45,8 +46,9 @@ class AddFromOcrScreen(Screen):
         # pil_img = pil_img.convert("L")
         huge_size = path.getsize(workdir + "/data/ocr_image.png")
         
-        factor = huge_size / 1000000
-        pil_img = pil_img.reduce(int(factor))
+        factor = int(huge_size / 1000000)
+        factor = 1 if factor <= 0 else factor
+        pil_img = pil_img.reduce(factor)
 
         pil_img.save(workdir + "/data/ocr_image.png")
 
@@ -195,7 +197,7 @@ class AddFromOcrScreen(Screen):
             self.cropping_rect = CroppingRectangle()
 
         if self.camera is None:
-            self.camera = Camera(pos_hint={"center_x": 0.5, "center_y": 0.5}, play=True)
+            self.camera = MyCamera(pos_hint={"center_x": 0.5, "center_y": 0.5}, play=True, index=0)
             self.camera_layout.add_widget(self.camera)
 
         Clock.schedule_once(lambda nt: self.refresh_camera(), 0.05)

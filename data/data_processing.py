@@ -23,8 +23,19 @@ def get_cards_from_file(filename: str, hidden_pattern: str, def_pattern: str) ->
     mode = ""  # indicated current position of parser, tells what kind of lines is being read
     current_card = Flashcard(id=None, hidden_lines=[], def_lines=[], tags=[])
 
-    with open(filename, encoding="utf-8") as file:
-        for line in file.readlines():
+    with open(filename, encoding="utf-8", errors="replace") as file:
+
+        try:
+            lines = file.readlines()
+        
+        except UnicodeError:
+            return None
+
+        for line in lines:
+
+            # dealing with utf-8 starting char problem
+            if ord(line[0]) == 65279:
+                line = line[1:]
 
             if line.startswith(hidden_pattern):
                 if mode == "def":

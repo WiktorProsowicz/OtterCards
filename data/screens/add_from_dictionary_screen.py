@@ -43,7 +43,7 @@ class AddFromDictionaryScreen(Screen):
 
     def show_language_modes(self):
         # preparing tag popup
-        modes_container = SmartGridLayout(cols=2, size_hint=(1, None), spacing=dp(10))
+        modes_container = SmartGridLayout(cols=2, size_hint=(1, None), spacing=dp(10), padding=[0, dp(10)])
         slider = ScrollView(size=(self.main_layout.width * 0.9, self.main_layout.height * 0.5),
                             do_scroll_x=False, effect_y=ScrollEffect(), bar_inactive_color=(0, 0, 0, 0),
                             pos_hint={"y": 0})
@@ -53,7 +53,7 @@ class AddFromDictionaryScreen(Screen):
         slider.add_widget(modes_container)
 
         modes_popup = Popup(title="choose mode", auto_dismiss=True,
-                            size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
+                            size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 1),
                             title_color=get_color_from_hex("#444444"),
                             background=workdir + "/data/textures/popup_background.png",
                             title_size=self.title_label.font_size * 0.9, content=slider,
@@ -188,15 +188,14 @@ class AddFromDictionaryScreen(Screen):
 
         self.pages.page = 1
 
-        Clock.schedule_once(lambda nt: self.cards_increaser.draw(), 0.07)
-        Clock.schedule_once(lambda nt: self.subdefs_increaser.draw(), 0.07)
-        Clock.schedule_once(lambda nt: self.language_mode.draw(), 0.07)
-
-    def on_enter(self, *args):
         self.cards_increaser.value = 3
         self.subdefs_increaser.value = 5
         self.language_mode.language_mode = None
         self.word_input.text = ""
+
+        Clock.schedule_once(lambda nt: self.cards_increaser.draw(), 0.07)
+        Clock.schedule_once(lambda nt: self.subdefs_increaser.draw(), 0.07)
+        Clock.schedule_once(lambda nt: self.language_mode.draw(), 0.07)
 
     def __init__(self, **kwargs):
         super(AddFromDictionaryScreen, self).__init__(**kwargs)

@@ -164,10 +164,11 @@ def tags_popup(title: str, screen_size: tuple, database_dir: str, tag_callback, 
     elif empty_title is not None:
         so_empty_lbl = Label(text=empty_title, size_hint=(1, None),
                              pos_hint={"center_y": 0.5, "center_x": 0.5},
-                             color=get_color_from_hex("#444444"), font_size=screen_size[0] * 0.8 * 0.07)
+                             color=get_color_from_hex("#444444"), font_size=screen_size[0] * 0.8 * 0.07,
+                             height=screen_size[0] * 0.8 * 0.12)
         tags_popup.separator_color = (0, 0, 0, 1)
         tag_container.add_widget(so_empty_lbl)
-        tags_pop.height -= slider.height - so_empty_lbl.height
+        tags_pop.height -= slider.height / 1.1
 
     tag_container.resize_v()
 
@@ -222,7 +223,7 @@ def boxes_popup(title: str, screen_size: tuple, database_dir: str, box_callback,
                              color=get_color_from_hex("#444444"), font_size=screen_size[0] * 0.7 * 0.07)
         tags_popup.separator_color = (0, 0, 0, 1)
         box_container.add_widget(so_empty_lbl)
-        box_pop.height -= slider.height - so_empty_lbl.height
+        box_pop.height -= slider.height / 1.5
 
     if len(retrieved_boxes) == 1:
         box_container.add_widget(Label(opacity=0, size_hint=(0.45, None)))
@@ -261,3 +262,23 @@ def revising_parameters_popup(screen_size: tuple, workdir, def_callback, submit_
     def_btn.state = "down"
 
     return revising_pop
+
+
+def welcome_popup(screen_size: tuple):
+    workdir = Cache.get("app_info", "work_dir")
+
+    text = "It seems that you are willing to find new learning methods. To make the most out of this app, please read " \
+           "short description available at 'info & help'."
+
+    lbl = Label(text=text, font_size=screen_size[0] * 0.05, valign="center", halign="center",
+                text_size=(screen_size[0] * 0.85, None), color=get_color_from_hex("#444444"))
+
+    pop = Popup(title="Welcome to OtterCards!", auto_dismiss=True,
+                size_hint=(0.9, None), title_align="center", separator_color=(0, 0, 0, 0),
+                title_color=get_color_from_hex("#444444"),
+                background=workdir + "/data/textures/popup_background.png",
+                title_size=screen_size[0] * 0.08, content=lbl,
+                border=[0, 0, 0, 0], height=screen_size[0] * 0.6 + screen_size[0] * 0.1 * 0.5)
+
+    return pop
+

@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup, NavigableString
 from urllib import request, error
 from .flashcards.flashcards_exceptions import DictionaryError
+import ssl
 
 url_map = {
     "!": "%21", "#": "%23", "$": "%24", "&": "%26", "'": "%27",
@@ -64,8 +65,12 @@ def get_entries_from_diki(word: str, language: str, subdefs_limit: int, flashcar
     elif language == "german":
         url = f"https://www.diki.pl/slownik-niemieckiego?q={prettify(word)}"
 
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
     try:
-        plain_html = request.urlopen(url).read()
+        plain_html = request.urlopen(url, context=ctx).read()
     except error.URLError:
         raise DictionaryError
 
@@ -164,8 +169,12 @@ def get_to_english_from_babla(word: str, language: str, subdefs_limit: int, flas
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
     try:
-        plain_html = request.urlopen(request.Request(url, headers=hdr))
+        plain_html = request.urlopen(request.Request(url, headers=hdr), context=ctx)
 
     except error.URLError:
         raise DictionaryError
@@ -229,9 +238,12 @@ def get_chinese_words_from_mdbg(word: str, l_mode: str, subdefs_limit: int, flas
 
     url = f"https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb={prettify(word)}"
 
-    try:
-        plain_html = request.urlopen(url)
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
 
+    try:
+        plain_html = request.urlopen(url, context=ctx).read()
     except error.URLError:
         raise DictionaryError
 
@@ -293,9 +305,12 @@ def get_english_japanese_from_tangorin(word: str, l_mode: str, subdefs_limit: in
 
     url = f"https://tangorin.com/words?search={prettify(word)}"
 
-    try:
-        plain_html = request.urlopen(url)
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
 
+    try:
+        plain_html = request.urlopen(url, context=ctx).read()
     except error.URLError:
         raise DictionaryError
 

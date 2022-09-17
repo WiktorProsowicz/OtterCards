@@ -46,7 +46,7 @@
 
             MenuButton:
                 id: flashcards_btn
-                on_release: app.switch_screen("cards_screen", "left")
+                on_release: root.request_perms()
                 text: "flashcards"
                 pos_hint: {"center_x": 0.5, "top": 1}
 
@@ -61,6 +61,7 @@
                 on_release: app.switch_screen("info_help_screen", "left")
                 text: "info & help"
                 pos_hint: {"center_x": 0.5, "y": 0}
+
 
     FloatLayout:
         id: header

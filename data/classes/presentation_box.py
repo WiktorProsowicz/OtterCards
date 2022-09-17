@@ -123,7 +123,7 @@ class PresentationBox(Widget):
                 Color(rgba=get_color_from_hex("#105e4d"))
                 Rectangle(size=(revision_lbl.texture.width, revision_lbl.texture.height),
                           pos=(self.x - dp(3),
-                               self.top - revision_lbl.texture.height), texture=revision_lbl.texture)
+                               self.y + self.height - revision_lbl.texture.height), texture=revision_lbl.texture)
 
     def __init__(self, **kwargs):
         super(PresentationBox, self).__init__(**kwargs)

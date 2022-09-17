@@ -226,7 +226,7 @@ class BoxDisplayScreen(Screen):
                 if card.marked:
                     card.toggle_marked()
                 card.bind(pos=card.draw, width=card.adjust_style)
-                card.bind(size=self.left_container.resize_v, on_choose=card.toggle_marked)
+                card.bind(size=self.left_container.resize_v, on_hold=card.toggle_marked)
                 card.bind(marked=self.refresh_left_utensils)
                 self.left_container.add_widget(card)
 

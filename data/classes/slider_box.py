@@ -78,7 +78,7 @@ class SliderBox(Widget):
             RoundedRectangle(size=(self.width * 0.65, self.width * 0.5),
                              pos=(self.x + self.width * 0.1, self.y + self.width * 0.595))
 
-            Color(rgba=get_color_from_hex("#FFFFFF"))
+            Color(rgba=get_color_from_hex("#444444"))
             Rectangle(size=(self.width * 0.5, self.width * 0.5),
                       pos=(self.x + self.width * 0.2, self.y + self.height / 2.5),
                       source=Cache.get("app_info", "work_dir") + "/data/textures/otter_silhouette.png")

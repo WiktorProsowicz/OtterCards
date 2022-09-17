@@ -70,20 +70,22 @@
         BoxLayout:
             size_hint: (0.03, None)
             height: dp(8)
-            pos_hint: {"center_x": 0.5, "y": 0}
+            pos_hint: {"center_x": 0.5, "top": 1.05}
             orientation: "horizontal"
             spacing: dp(5)
 
             LanguageButton:
                 id: first_dot
-                size_hint: {0.45, 1}
+                size_hint: (1, 1)
                 state: "down"
                 group: "dots"
+                disabled: True
 
             LanguageButton:
                 id: second_dot
-                size_hint: {0.45, 1}
+                size_hint: (1, 1)
                 group: "dots"
+                disabled: True
 
         Carousel:
             id: carousel
@@ -92,7 +94,7 @@
             size_hint: (1, 0.97)
             anim_cancel_duration: 0.2
             ignore_perpendicular_swipes: True
-            scroll_timeout: 50
+            scroll_timeout: 75
             scroll_distance: dp(3)
             min_move: 0.1
             on_current_slide: root.on_slide_change(self.index)
@@ -133,7 +135,7 @@
 
                         FloatLayout:
                             id: normal_box_cnt
-                            size_hint: (None, 0.97)
+                            size_hint: (None, 0.9)
                             width: self.height / 1.5
                             pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
@@ -155,7 +157,7 @@
                         text: "choose compartment"
 
                     Image:
-                        size_hint: (None, 1)
+                        size_hint: (0.5, 0.5)
                         source: app.directory + "/data/textures/compartment.png"
                         pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
@@ -239,6 +241,7 @@
                         text: "select boxes to dump cards"
                         pos_hint: {"center_x": 0.5, "top": 1}
                         color: c("#444444")
+                        font_size: self.height * 0.6
 
                     ScrollView:
                         id: boxes_slider

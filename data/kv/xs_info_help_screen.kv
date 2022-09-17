@@ -43,7 +43,7 @@
 
             GridLayout:
                 size_hint: (1, None)
-                height: root.height * 5.8
+                height: root.width * 13
                 cols: 1
                 spacing: dp(10)
 
@@ -121,14 +121,34 @@
 
                 Label:
                     size_hint: (1, None)
-                    height: self.width / 1.2
+                    height: self.width / 1.3
                     font_size: self.width * 0.05
                     color: c("#444444")
                     markup: True
                     text_size: self.size
-                    text: "[color=178f7f]Revisions[/color]\nare the main part of the learning process. A single revision takes two parameters: a box and compartment number. After seeing every card you need to decide whether you answered correctly (shift right) or not (left). When revising cards from normal box card either stays in its compartment or goes to the next one. In second case flashcard goes to previously pointed box for further revision or is removed from the box (because you apparently mastered it)."
+                    text: "[color=178f7f]Revisions[/color]\nare the main part of the learning process. A single revision takes two parameters: a box and compartment number. After seeing every card you need to decide whether you answered correctly (shift right) or not (left). When revising cards from normal box card either stays in its compartment or goes to the next one."
                     valign: "middle"
                     line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.5
+                    source: app.directory + "/data/textures/normal_revision_info.png"
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 1.7
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    text_size: self.size
+                    text: "In second case flashcard goes to previously pointed box for further revision or is removed from the box (because you apparently mastered it)."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Image:
+                    size_hint: (1, None)
+                    height: self.width / 1.6
+                    source: app.directory + "/data/textures/special_revision_info.png"
 
                 Label:
                     size_hint: (1, None)
@@ -193,7 +213,6 @@
                     valign: "middle"
                     line_height: 1.2
 
-
                 Image:
                     size_hint: (1, None)
                     height: self.width / 1
@@ -201,11 +220,21 @@
 
                 Label:
                     size_hint: (1, None)
-                    height: self.width / 1.7
+                    height: self.width / 1.5
+                    font_size: self.width * 0.05
+                    color: c("#444444")
+                    text_size: self.size
+                    text: "tips: \n- whenever you don't know what to do, just hold or click the widgets\n- card waiting room is a place where you can edit collection imported from file or dictionary. You can simply hold the cards and pick options from menu."
+                    valign: "middle"
+                    line_height: 1.2
+
+                Label:
+                    size_hint: (1, None)
+                    height: self.width / 2
                     font_size: self.width * 0.05
                     color: c("#444444")
                     markup: True
                     text_size: self.size
-                    text: "[color=11646b]Author:[/color]\nWiktor Prosowicz (idea, code, layout&amp;arts)\n[color=11646b]Additionally:[/color]\nIda Maryńczak (arts, auxiliary logo image)\nPaweł Morek (main logo)"
+                    text: "[color=11646b]Author:[/color]\nWiktor Prosowicz (idea, code, layout&amp;arts)\n[color=11646b]Additionally:[/color]\nIda Maryńczak (arts, logo image)"
                     valign: "middle"
                     line_height: 1.2

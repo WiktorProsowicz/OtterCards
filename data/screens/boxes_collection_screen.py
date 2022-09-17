@@ -8,6 +8,7 @@ from kivy.utils import get_color_from_hex
 from ..classes.utensils import UtensilDropUp, UtensilButton
 from kivy.metrics import dp
 from kivy.app import App
+from kivy.clock import Clock
 
 
 class BoxesCollectionScreen(Screen):
@@ -148,6 +149,8 @@ class BoxesCollectionScreen(Screen):
 
         self.slider.scroll_y = 1
 
+        self.empty_info()
+
     def enable_disable_scroll(self, *args):
         if self.slider_container.height > self.slider.height:
             self.slider.do_scroll_y = True
@@ -156,20 +159,18 @@ class BoxesCollectionScreen(Screen):
 
     def empty_info(self):
         # adding encouraging label in case there are no tags
-        if not self.slider_boxes:
+        if not self.slider_boxes and self.so_empty_lbl not in self.main_layout.children:
 
-            if self.slider_boxes and self.so_empty_lbl in self.main_layout.children:
-                self.main_layout.remove_widget(self.so_empty_lbl)
+            if self.so_empty_lbl is None:
+                text = "so empty...\nconsider adding some boxes!"
 
-            text = "so empty...\nconsider adding some boxes!"
-
-            self.so_empty_lbl = Label(text=text, size_hint=(1, None),
-                                      pos_hint={"center_y": 0.6, "center_x": 0.5},
-                                      color=get_color_from_hex("#AAAAAA"), font_size=self.slider_container.width * 0.07)
+                self.so_empty_lbl = Label(text=text, size_hint=(1, None),
+                                          pos_hint={"center_y": 0.6, "center_x": 0.5},
+                                          color=get_color_from_hex("#AAAAAA"), font_size=self.slider_container.width * 0.07)
 
             self.main_layout.add_widget(self.so_empty_lbl)
 
-        elif self.slider_boxes and self.so_empty_lbl in self.main_layout.children:
+        elif self.so_empty_lbl in self.main_layout.children:
             self.main_layout.remove_widget(self.so_empty_lbl)
 
     def on_enter(self, *args):
@@ -197,7 +198,6 @@ class BoxesCollectionScreen(Screen):
             self.more_btn.bind(on_release=self.utensils.toggle)
             self.ids["additional_layout"].add_widget(self.utensils)
 
-        self.empty_info()
         self.update_buttons()
 
     def update_buttons(self):
@@ -223,7 +223,7 @@ class BoxesCollectionScreen(Screen):
         for box in retrieved_boxes:
             self.slider_boxes.append(SliderBox(box))
 
-        self.refresh()
+        Clock.schedule_once(lambda nt: self.refresh(), 0.07)
 
     def __init__(self, **kwargs):
         super(BoxesCollectionScreen, self).__init__(**kwargs)

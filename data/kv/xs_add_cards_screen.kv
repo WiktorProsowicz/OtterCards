@@ -81,10 +81,10 @@
                 text: "from dictionary"
                 size_hint: (1, None)
                 pos_hint: {"y": 0.27, "center_x": 0.5}
-                on_release: app.switch_screen("add_from_dictionary_screen", "left")
+                on_release: root.request_dict_perms()
 
             MenuButton:
                 text: "from OCR scanner"
                 size_hint: (1, None)
                 pos_hint: {"y": 0, "center_x": 0.5}
-                on_release: app.switch_screen("add_from_ocr_screen", "left")
+                on_release: root.request_ocr_perms()

@@ -135,6 +135,11 @@ class RevisingSettingsScreen(Screen):
         if len(self.dump_boxes) == 1:
             self.dump_boxes_cnt.add_widget(Label(opacity=0, size_hint=(0.45, None)))
 
+        elif not self.dump_boxes:
+            self.dump_boxes_cnt.add_widget(Label(size_hint=(1, None), height=self.boxes_slider.height * 0.8,
+                                           text="no boxes to dump the cards", font_size=self.dump_boxes_cnt.width * 0.1,
+                                           color=(.4, .4, .4, 1), halign="center", text_size=(self.dump_boxes_cnt.width * 0.9, None)))
+
         self.dump_boxes_cnt.resize_v()
 
         self.boxes_slider.scroll_y = 1
