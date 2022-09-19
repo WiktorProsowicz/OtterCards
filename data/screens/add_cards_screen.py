@@ -32,7 +32,7 @@ class AddCardsScreen(Screen):
                     OtterCardsConfig.append("granted_camera_permission", 1)
                     OtterCardsConfig.save()
 
-                    App.get_running_app().switch_screen("add_from_ocr_screen", "left")
+                    # App.get_running_app().switch_screen("add_from_ocr_screen", "left")
 
             request_permissions([Permission.INTERNET, Permission.CAMERA], perms_callback)
 
